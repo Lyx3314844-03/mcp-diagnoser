@@ -39,6 +39,7 @@ export interface SearchResults {
 }
 
 export const SEARCH_ENGINES: Record<string, SearchEngine> = {
+  // ========== 通用搜索引擎 ==========
   google: {
     name: 'Google',
     baseUrl: 'https://www.google.com/search',
@@ -53,13 +54,6 @@ export const SEARCH_ENGINES: Record<string, SearchEngine> = {
     description: 'Microsoft Bing - 微软搜索引擎',
     region: 'global',
   },
-  baidu: {
-    name: 'Baidu',
-    baseUrl: 'https://www.baidu.com/s',
-    searchParam: 'wd',
-    description: '百度搜索 - 中国最大搜索引擎',
-    region: 'cn',
-  },
   duckduckgo: {
     name: 'DuckDuckGo',
     baseUrl: 'https://duckduckgo.com/',
@@ -67,12 +61,12 @@ export const SEARCH_ENGINES: Record<string, SearchEngine> = {
     description: 'DuckDuckGo - 隐私保护搜索引擎',
     region: 'global',
   },
-  yahoo: {
-    name: 'Yahoo',
-    baseUrl: 'https://search.yahoo.com/search',
-    searchParam: 'p',
-    description: 'Yahoo Search - 雅虎搜索引擎',
-    region: 'us',
+  baidu: {
+    name: 'Baidu',
+    baseUrl: 'https://www.baidu.com/s',
+    searchParam: 'wd',
+    description: '百度搜索 - 中国最大搜索引擎',
+    region: 'cn',
   },
   yandex: {
     name: 'Yandex',
@@ -80,6 +74,13 @@ export const SEARCH_ENGINES: Record<string, SearchEngine> = {
     searchParam: 'text',
     description: 'Yandex - 俄罗斯搜索引擎',
     region: 'ru',
+  },
+  yahoo: {
+    name: 'Yahoo',
+    baseUrl: 'https://search.yahoo.com/search',
+    searchParam: 'p',
+    description: 'Yahoo Search - 雅虎搜索引擎',
+    region: 'us',
   },
   sogou: {
     name: 'Sogou',
@@ -95,6 +96,52 @@ export const SEARCH_ENGINES: Record<string, SearchEngine> = {
     description: '360 搜索 - 中国搜索引擎',
     region: 'cn',
   },
+  
+  // ========== 中文搜索引擎 ==========
+  wechat: {
+    name: 'WeChat',
+    baseUrl: 'https://weixin.sogou.com/weixin',
+    searchParam: 'query',
+    description: '微信搜索 - 公众号文章搜索',
+    region: 'cn',
+  },
+  zhihu: {
+    name: 'Zhihu',
+    baseUrl: 'https://www.zhihu.com/search',
+    searchParam: 'q',
+    description: '知乎 - 中文问答社区',
+    region: 'cn',
+  },
+  weibo: {
+    name: 'Weibo',
+    baseUrl: 'https://s.weibo.com/weibo',
+    searchParam: 'q',
+    description: '微博搜索 - 社交媒体搜索',
+    region: 'cn',
+  },
+  douban: {
+    name: 'Douban',
+    baseUrl: 'https://search.douban.com/book/subject_search',
+    searchParam: 'search_text',
+    description: '豆瓣搜索 - 书籍/电影/音乐搜索',
+    region: 'cn',
+  },
+  tmall: {
+    name: 'Tmall',
+    baseUrl: 'https://list.tmall.com/search_product.htm',
+    searchParam: 'q',
+    description: '天猫搜索 - 电商搜索',
+    region: 'cn',
+  },
+  jd: {
+    name: 'JD',
+    baseUrl: 'https://search.jd.com/Search',
+    searchParam: 'keyword',
+    description: '京东搜索 - 电商搜索',
+    region: 'cn',
+  },
+  
+  // ========== 代码/技术搜索 ==========
   github: {
     name: 'GitHub',
     baseUrl: 'https://github.com/search',
@@ -109,13 +156,29 @@ export const SEARCH_ENGINES: Record<string, SearchEngine> = {
     description: 'Stack Overflow - 编程问答搜索',
     region: 'global',
   },
-  reddit: {
-    name: 'Reddit',
-    baseUrl: 'https://www.reddit.com/search',
+  npm: {
+    name: 'npm',
+    baseUrl: 'https://www.npmjs.com/search',
     searchParam: 'q',
-    description: 'Reddit - 社交新闻搜索',
+    description: 'npm Search - Node.js 包搜索',
     region: 'global',
   },
+  pypi: {
+    name: 'PyPI',
+    baseUrl: 'https://pypi.org/search/',
+    searchParam: 'q',
+    description: 'PyPI Search - Python 包搜索',
+    region: 'global',
+  },
+  mdn: {
+    name: 'MDN',
+    baseUrl: 'https://developer.mozilla.org/zh-CN/search',
+    searchParam: 'q',
+    description: 'MDN Web Docs - Web 开发文档',
+    region: 'global',
+  },
+  
+  // ========== 视频搜索 ==========
   youtube: {
     name: 'YouTube',
     baseUrl: 'https://www.youtube.com/results',
@@ -130,7 +193,30 @@ export const SEARCH_ENGINES: Record<string, SearchEngine> = {
     description: '哔哩哔哩 - 中国视频搜索',
     region: 'cn',
   },
-  scholarly: {
+  vimeo: {
+    name: 'Vimeo',
+    baseUrl: 'https://vimeo.com/search',
+    searchParam: 'q',
+    description: 'Vimeo - 高清视频搜索',
+    region: 'global',
+  },
+  youku: {
+    name: 'Youku',
+    baseUrl: 'https://so.youku.com/',
+    searchParam: 'keyword',
+    description: '优酷搜索 - 中国视频搜索',
+    region: 'cn',
+  },
+  iqiyi: {
+    name: 'iQiyi',
+    baseUrl: 'https://so.iqiyi.com/so/q',
+    searchParam: 'keyword',
+    description: '爱奇艺搜索 - 中国视频搜索',
+    region: 'cn',
+  },
+  
+  // ========== 学术搜索 ==========
+  scholar: {
     name: 'Google Scholar',
     baseUrl: 'https://scholar.google.com/scholar',
     searchParam: 'q',
@@ -142,6 +228,80 @@ export const SEARCH_ENGINES: Record<string, SearchEngine> = {
     baseUrl: 'https://arxiv.org/search/',
     searchParam: 'query',
     description: 'arXiv - 物理论文搜索',
+    region: 'global',
+  },
+  cnki: {
+    name: 'CNKI',
+    baseUrl: 'https://search.cnki.com.cn/Search.aspx',
+    searchParam: 'q',
+    description: 'CNKI 知网 - 中国学术论文搜索',
+    region: 'cn',
+  },
+  pubmed: {
+    name: 'PubMed',
+    baseUrl: 'https://pubmed.ncbi.nlm.nih.gov/',
+    searchParam: 'term',
+    description: 'PubMed - 生物医学文献搜索',
+    region: 'global',
+  },
+  semantic_scholar: {
+    name: 'Semantic Scholar',
+    baseUrl: 'https://www.semanticscholar.org/search',
+    searchParam: 'q',
+    description: 'Semantic Scholar - AI 驱动学术搜索',
+    region: 'global',
+  },
+  
+  // ========== 新闻搜索 ==========
+  google_news: {
+    name: 'Google News',
+    baseUrl: 'https://news.google.com/search',
+    searchParam: 'q',
+    description: 'Google News - 新闻搜索',
+    region: 'global',
+  },
+  baidu_news: {
+    name: 'Baidu News',
+    baseUrl: 'https://news.baidu.com/ns',
+    searchParam: 'word',
+    description: '百度新闻 - 新闻搜索',
+    region: 'cn',
+  },
+  sina: {
+    name: 'Sina',
+    baseUrl: 'https://search.sina.com.cn/',
+    searchParam: 'q',
+    description: '新浪搜索 - 新闻搜索',
+    region: 'cn',
+  },
+  
+  // ========== 社交/社区搜索 ==========
+  reddit: {
+    name: 'Reddit',
+    baseUrl: 'https://www.reddit.com/search',
+    searchParam: 'q',
+    description: 'Reddit - 社交新闻搜索',
+    region: 'global',
+  },
+  twitter: {
+    name: 'Twitter',
+    baseUrl: 'https://twitter.com/search',
+    searchParam: 'q',
+    description: 'Twitter Search - 社交媒体搜索',
+    region: 'global',
+  },
+  telegram: {
+    name: 'Telegram',
+    baseUrl: 'https://t.me/s',
+    searchParam: 'q',
+    description: 'Telegram Search - 频道搜索',
+    region: 'global',
+  },
+  quora: {
+    name: 'Quora',
+    baseUrl: 'https://www.quora.com/search',
+    searchParam: 'q',
+    description: 'Quora - 问答搜索',
     region: 'global',
   },
 };
@@ -585,23 +745,36 @@ export class BrowserSearcher {
     console.log(chalk.bold.cyan('\n═'.repeat(70)));
     console.log(chalk.bold.cyan('  Available Search Engines'));
     console.log(chalk.bold.cyan('═'.repeat(70)) + '\n');
-    
+
     const categories = {
-      'General': ['google', 'bing', 'baidu', 'duckduckgo', 'yahoo', 'yandex', 'sogou', 'so360'],
-      'Developer': ['github', 'stackoverflow'],
-      'Social': ['reddit', 'youtube', 'bilibili'],
-      'Academic': ['scholarly', 'arxiv'],
+      '🌐 通用搜索引擎': ['google', 'bing', 'duckduckgo', 'baidu', 'yandex', 'yahoo', 'sogou', 'so360'],
+      '🇨🇳 中文搜索引擎': ['wechat', 'zhihu', 'weibo', 'douban', 'tmall', 'jd'],
+      '💻 代码/技术搜索': ['github', 'stackoverflow', 'npm', 'pypi', 'mdn'],
+      '🎬 视频搜索': ['youtube', 'bilibili', 'vimeo', 'youku', 'iqiyi'],
+      '📚 学术搜索': ['scholar', 'arxiv', 'cnki', 'pubmed', 'semantic_scholar'],
+      '📰 新闻搜索': ['google_news', 'baidu_news', 'sina'],
+      '💬 社交/社区搜索': ['reddit', 'twitter', 'telegram', 'quora'],
     };
-    
+
     for (const [category, engines] of Object.entries(categories)) {
       console.log(chalk.bold.yellow(`  ${category}:`));
+      console.log(chalk.gray('  ' + '─'.repeat(40)));
       for (const engineKey of engines) {
         const engine = SEARCH_ENGINES[engineKey];
         if (engine) {
-          console.log(chalk.gray(`    ${engine.name.padEnd(15)} - ${engine.description}`));
+          console.log(chalk.gray(`    ${engine.name.padEnd(20)} - ${engine.description}`));
         }
       }
       console.log();
     }
+    
+    console.log(chalk.bold.cyan('═'.repeat(70)));
+    console.log(chalk.yellow('\n  Usage Examples:'));
+    console.log(chalk.gray('    mcp-diagnoser multi-search "query" --engines google,bing'));
+    console.log(chalk.gray('    mcp-diagnoser multi-search "query" --engines github,stackoverflow'));
+    console.log(chalk.gray('    mcp-diagnoser multi-search "query" --engines zhihu,wechat'));
+    console.log(chalk.gray('    mcp-diagnoser smart-search "query" --query-type code'));
+    console.log(chalk.gray('    mcp-diagnoser smart-search "query" --query-type video'));
+    console.log('');
   }
 }
