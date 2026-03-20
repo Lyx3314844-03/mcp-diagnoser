@@ -18,7 +18,7 @@ import { execa } from 'execa';
 import chalk from 'chalk';
 import ora from 'ora';
 
-const version = '1.3.0';
+const version = '2.0.0';
 
 program
   .name('mcp-diagnoser')
