@@ -13,6 +13,7 @@ import { BrowserSearcher, SEARCH_ENGINES } from './tools/browser-search.js';
 import { WebCrawler } from './tools/web-crawler.js';
 import { PackageDiagnoser } from './tools/package-diagnoser.js';
 import { EnhancedSearcher, multiSearch, smartSearch, showCacheStats, clearCache } from './tools/enhanced-search.js';
+import { firecrawlSearch } from './tools/firecrawl-search.js';
 import { execa } from 'execa';
 import chalk from 'chalk';
 import ora from 'ora';
@@ -263,6 +264,17 @@ program
     } else if (options.stats || !options.clear) {
       await showCacheStats();
     }
+  });
+
+program
+  .command('firecrawl-search <query>')
+  .description('Search using Firecrawl API for better results')
+  .option('-n, --limit <number>', 'Maximum results', '10')
+  .option('-l, --lang <lang>', 'Language preference', 'zh')
+  .option('-c, --country <country>', 'Country preference', 'cn')
+  .action(async (query, options, cmd) => {
+    const globalOpts = cmd.parent.opts();
+    await firecrawlSearch(query, { ...globalOpts, ...options });
   });
 
 program.parse(process.argv);

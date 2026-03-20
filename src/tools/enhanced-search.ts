@@ -490,17 +490,29 @@ export class EnhancedSearcher {
     // Build search URL
     const url = this.buildSearchUrl(engine, query, options);
 
-    // Use curl to fetch
-    const { stdout } = await execa('curl', [
-      '-s',
-      '-L',
-      '-A', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      '--max-time', '10',
-      url,
-    ], { timeout: 15000 });
+    let html = '';
+    
+    // Try Playwright first for JavaScript-rendered pages
+    try {
+      html = await this.fetchWithPlaywright(url);
+    } catch (playwrightError) {
+      // Fallback to curl
+      try {
+        const { stdout } = await execa('curl', [
+          '-s',
+          '-L',
+          '-A', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          '--max-time', '10',
+          url,
+        ], { timeout: 15000 });
+        html = stdout;
+      } catch (curlError) {
+        throw new Error(`Both Playwright and curl failed: ${curlError instanceof Error ? curlError.message : 'Unknown error'}`);
+      }
+    }
 
     // Parse results
-    const results = this.parseSearchResults(stdout, engine.name);
+    const results = this.parseSearchResults(html, engine.name);
 
     return {
       query,
@@ -509,6 +521,41 @@ export class EnhancedSearcher {
       results: results.map((r, i) => ({ ...r, position: i + 1 })),
       searchTime: 0,
     };
+  }
+
+  /**
+   * Fetch page content using Playwright for JavaScript-rendered pages
+   */
+  private async fetchWithPlaywright(url: string): Promise<string> {
+    const { chromium } = await import('playwright');
+    
+    const browser = await chromium.launch({ 
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+    
+    try {
+      const context = await browser.newContext({
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        viewport: { width: 1920, height: 1080 },
+      });
+      
+      const page = await context.newPage();
+      await page.goto(url, { 
+        waitUntil: 'domcontentloaded',
+        timeout: 30000 
+      });
+      
+      // Wait for search results to load
+      await page.waitForTimeout(2000);
+      
+      const html = await page.content();
+      await browser.close();
+      return html;
+    } catch (error) {
+      await browser.close().catch(() => {});
+      throw error;
+    }
   }
 
   /**
@@ -549,38 +596,142 @@ export class EnhancedSearcher {
   }
 
   /**
-   * Parse search results from HTML
+   * Parse search results from HTML (Improved version)
    */
   private parseSearchResults(html: string, engine: string): SearchResult[] {
     const results: SearchResult[] = [];
+    const normalizedHtml = html.replace(/\s+/g, ' ').toLowerCase();
     
-    // Simple regex-based extraction (improved version)
-    const urlRegex = /https?:\/\/[^\s"'<>]+/g;
-    const titleRegex = /<title[^>]*>([^<]+)<\/title>/i;
+    // Different engines have different result containers
+    const selectors: Record<string, { pattern: RegExp; title: RegExp; url: RegExp; snippet: RegExp }> = {
+      'Google': {
+        pattern: /<div[^>]*class="[^"]*g[^"]*"[^>]*>[\s\S]{0,3000}?<\/div>/gi,
+        title: /<h3[^>]*>([\s\S]{0,200}?)<\/h3>/i,
+        url: /<a[^>]*href="(https?:\/\/[^"]+)"[^>]*>/i,
+        snippet: /<div[^>]*class="[^"]*[Vv]004[^"]*"[^>]*>([\s\S]{0,300}?)<\/div>/i,
+      },
+      'Bing': {
+        pattern: /<li[^>]*class="[^"]*b_algo[^"]*"[^>]*>[\s\S]{0,3000}?<\/li>/gi,
+        title: /<h2[^>]*>([\s\S]{0,200}?)<\/h2>/i,
+        url: /<a[^>]*href="(https?:\/\/[^"]+)"[^>]*>/i,
+        snippet: /<p[^>]*>([\s\S]{0,300}?)<\/p>/i,
+      },
+      'DuckDuckGo': {
+        pattern: /<div[^>]*class="[^"]*result[^"]*"[^>]*>[\s\S]{0,3000}?<\/div>/gi,
+        title: /<a[^>]*class="[^"]*result__a[^"]*"[^>]*>([\s\S]{0,200}?)<\/a>/i,
+        url: /<a[^>]*data-testid="[^"]*"[^>]*href="(https?:\/\/[^"]+)"[^>]*>/i,
+        snippet: /<a[^>]*class="[^"]*result__snippet[^"]*"[^>]*>([\s\S]{0,300}?)<\/a>/i,
+      },
+    };
     
-    const urls = html.match(urlRegex) || [];
-    const titleMatch = html.match(titleRegex);
+    const selector = selectors[engine] || {
+      pattern: /<(div|li|article)[^>]*>[\s\S]{0,3000}?<\/\1>/gi,
+      title: /<(h[1-6])[^>]*>([\s\S]{0,200}?)<\/\1>/i,
+      url: /<a[^>]*href="(https?:\/\/[^"]+)"[^>]*>/i,
+      snippet: /<(p|span|div)[^>]*>([\s\S]{0,300}?)<\/\1>/i,
+    };
     
-    // Extract unique URLs
+    // Extract result containers
+    let match;
+    const containers: string[] = [];
+    
+    while ((match = selector.pattern.exec(html)) !== null) {
+      containers.push(match[0]);
+      if (containers.length >= 15) break; // Limit containers
+    }
+    
+    // Extract data from each container
     const seenUrls = new Set<string>();
-    for (const url of urls) {
-      const cleanUrl = url.replace(/[)]$/, '').replace(/&sa=[^&]+/, '');
-      
-      if (!seenUrls.has(cleanUrl) && 
-          !cleanUrl.includes('google.') && 
-          !cleanUrl.includes('bing.') &&
-          cleanUrl.startsWith('http')) {
-        seenUrls.add(cleanUrl);
-        results.push({
-          title: titleMatch ? titleMatch[1].trim() : cleanUrl,
-          url: cleanUrl,
-          snippet: '',
-          position: results.length + 1,
-          engine,
-        });
+    
+    for (const container of containers) {
+      try {
+        // Extract title
+        let title = '';
+        const titleMatch = container.match(selector.title);
+        if (titleMatch) {
+          title = titleMatch[1]
+            .replace(/<[^>]*>/g, '')
+            .replace(/&nbsp;/g, ' ')
+            .replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .trim();
+        }
+        
+        // Extract URL
+        let url = '';
+        const urlMatch = container.match(selector.url);
+        if (urlMatch) {
+          url = urlMatch[1]
+            .replace(/&amp;/g, '&')
+            .split('&')[0]; // Remove tracking params
+        }
+        
+        // Extract snippet
+        let snippet = '';
+        const snippetMatch = container.match(selector.snippet);
+        if (snippetMatch) {
+          snippet = snippetMatch[1]
+            .replace(/<[^>]*>/g, '')
+            .replace(/&nbsp;/g, ' ')
+            .replace(/&amp;/g, '&')
+            .trim();
+        }
+        
+        // Validate and add result
+        if (url && 
+            url.startsWith('http') && 
+            !url.includes('google.') && 
+            !url.includes('bing.') &&
+            !url.includes('duckduckgo.') &&
+            !seenUrls.has(url) &&
+            title.length > 0) {
+          
+          seenUrls.add(url);
+          results.push({
+            title: title.substring(0, 200),
+            url,
+            snippet: snippet.substring(0, 300),
+            position: results.length + 1,
+            engine,
+          });
+        }
+      } catch (error) {
+        // Skip malformed results
+        continue;
       }
     }
-
+    
+    // Fallback: extract any valid URLs with titles
+    if (results.length === 0) {
+      const urlRegex = /https?:\/\/[^\s"'<>)]+/g;
+      const urls = html.match(urlRegex) || [];
+      
+      for (const url of urls) {
+        const cleanUrl = url
+          .replace(/[)]$/, '')
+          .replace(/&sa=[^&]+/, '')
+          .split('&')[0];
+        
+        if (!seenUrls.has(cleanUrl) &&
+            !cleanUrl.includes('google.') &&
+            !cleanUrl.includes('bing.') &&
+            !cleanUrl.includes('duckduckgo.') &&
+            cleanUrl.startsWith('http')) {
+          seenUrls.add(cleanUrl);
+          results.push({
+            title: cleanUrl.split('/')[2] || cleanUrl,
+            url: cleanUrl,
+            snippet: '',
+            position: results.length + 1,
+            engine,
+          });
+          
+          if (results.length >= 10) break;
+        }
+      }
+    }
+    
     return results.slice(0, 10);
   }
 
