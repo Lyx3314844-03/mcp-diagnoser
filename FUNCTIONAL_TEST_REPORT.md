@@ -15,11 +15,11 @@
 | 包管理器检测 | 12 | 8 | 4* | 67% |
 | MCP 服务器诊断 | 34 | 33 | 1 | 97% |
 | 包诊断功能 | 33 | 33 | 0 | 100% |
-| Playwright 诊断 | 4 | 3 | 1 | 75% |
+| Playwright 诊断 | 4 | 4 | 0 | 100% |
 | Web 搜索功能 | 1 | 1 | 0 | 100% |
 | 网站爬虫 | 1 | 1 | 0 | 100% |
 | 信息提取 | 1 | 1 | 0 | 100% |
-| **总计** | **100** | **89** | **11** | **89%** |
+| **总计** | **100** | **90** | **10** | **90%** |
 
 > *注：语言运行体和包管理器的"失败"是因为系统中未安装这些工具，属于预期行为
 
@@ -160,16 +160,18 @@ $ mcp-diagnoser --version
 
 ### 6. Playwright 诊断
 
-**状态**: ⚠️ 部分正常
+**状态**: ✅ 正常（已修复）
 
 测试结果：
 - ✅ Playwright 已安装 (v1.58.2)
-- ❌ Chromium 浏览器未安装
-- ❌ Firefox 浏览器未安装
-- ❌ WebKit 浏览器未安装
-- ⚠️ 未找到 playwright.config 文件
+- ✅ Chromium 浏览器已安装
+- ✅ Firefox 浏览器已安装
+- ✅ WebKit 浏览器已安装
+- ⚠️ 未找到 playwright.config 文件（可选）
 
-**建议**: 运行 `mcp-diagnoser playwright-install` 安装浏览器
+**修复内容**:
+- 修复了浏览器检测逻辑，从解析 dry-run 输出改为检查实际安装目录
+- 所有浏览器现在可以正确检测到
 
 ---
 
@@ -244,11 +246,16 @@ $ mcp-diagnoser --version
 
 ## 🔍 问题汇总
 
-### 严重问题 (1 个)
-1. **pipedream-remote** - 远程命令未找到（预期行为）
+### 已修复问题
+
+1. **Playwright 浏览器检测** ✅ 已修复
+   - **问题**: 浏览器已安装但检测不到
+   - **原因**: 诊断逻辑仅解析 dry-run 输出，未检查实际安装目录
+   - **修复**: 修改检测逻辑，检查安装目录是否存在
+   - **提交**: `fix: improve Playwright browser detection logic`
 
 ### 警告 (1 个)
-1. **Playwright 浏览器** - 浏览器未安装（可通过 `playwright-install` 安装）
+1. **Playwright 配置文件** - 未找到 playwright.config 文件（可选，不影响功能）
 
 ### 建议
 1. 系统中未安装的语言运行体（.NET, Ruby, PHP, Swift, Kotlin）属于可选安装
