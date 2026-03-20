@@ -1,0 +1,26 @@
+{
+  "name": "mcp-diagnoser-server",
+  "version": "1.1.0",
+  "description": "MCP server version of the diagnostic tool with search and Playwright support",
+  "type": "module",
+  "main": "dist/server.js",
+  "bin": {
+    "mcp-diagnoser-server": "dist/server.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node src/server.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "execa": "^8.0.1",
+    "fs-extra": "^11.2.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^20.10.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
