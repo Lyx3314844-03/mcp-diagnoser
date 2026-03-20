@@ -1,7 +1,7 @@
 /**
  * MCP Web Tools Extension
  * Adds web search, crawl, and content extraction tools to MCP Diagnoser
- * 
+ *
  * Author: Lan <3314844@gmail.com>
  * Version: 1.3.0
  */
@@ -167,7 +167,7 @@ export async function executeWebSearch(
 ) {
   try {
     const args = ['web-search', query, '--engine', engine, '--limit', String(limit), '--language', language];
-    
+
     if (timeRange) {
       args.push('--time-range', timeRange);
     }
@@ -198,11 +198,11 @@ export async function executeWebsiteCrawl(
 ) {
   try {
     const args = ['crawl', url, '--max-pages', String(maxPages), '--max-depth', String(maxDepth)];
-    
+
     if (!sameDomain) {
       args.push('--allow-external');
     }
-    
+
     if (excludePatterns.length > 0) {
       args.push('--exclude', excludePatterns.join(','));
     }
@@ -234,19 +234,19 @@ export async function executeWebsiteSearch(
 ) {
   try {
     const args = ['search-content', url, query];
-    
+
     if (caseSensitive) {
       args.push('--case-sensitive');
     }
-    
+
     if (wholeWord) {
       args.push('--whole-word');
     }
-    
+
     if (regex) {
       args.push('--regex');
     }
-    
+
     args.push('--context', String(contextLines));
 
     const { stdout } = await execa('mcp-diagnoser', args, {
@@ -275,19 +275,19 @@ export async function executeWebsiteInfoExtraction(
 ) {
   try {
     const args = ['extract-info', url];
-    
+
     if (extractEmails) {
       args.push('--emails');
     }
-    
+
     if (extractPhones) {
       args.push('--phones');
     }
-    
+
     if (extractLinks) {
       args.push('--links');
     }
-    
+
     if (extractSocial) {
       args.push('--all');
     }

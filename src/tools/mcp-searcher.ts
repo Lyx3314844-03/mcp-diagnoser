@@ -317,13 +317,25 @@ export class PlaywrightDiagnoser {
     let version: string | undefined;
 
     try {
-      // Check if browser is installed via Playwright
+      // Check if browser is installed by verifying the installation directory exists
       const { stdout } = await execa('npx', ['playwright', 'install', browser, '--dry-run'], {
         timeout: 10000,
         reject: false,
       });
 
-      if (stdout.includes('already installed') || stdout.includes('Installation complete')) {
+      // Parse the install location from dry-run output
+      const installLocationMatch = stdout.match(/Install location:\s*(.+)/);
+      if (installLocationMatch) {
+        const installLocation = installLocationMatch[1].trim();
+        const fs = await import('fs-extra');
+        // Check if the installation directory exists
+        if (await fs.pathExists(installLocation)) {
+          installed = true;
+        } else {
+          installed = false;
+          issues.push(`${browser} is not installed`);
+        }
+      } else if (stdout.includes('already installed') || stdout.includes('Installation complete')) {
         installed = true;
       } else if (stdout.includes('not installed') || stdout.includes('Installing')) {
         installed = false;
