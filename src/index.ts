@@ -12,6 +12,7 @@ import { MCPSearcher, PlaywrightDiagnoser } from './tools/mcp-searcher.js';
 import { BrowserSearcher, SEARCH_ENGINES } from './tools/browser-search.js';
 import { WebCrawler } from './tools/web-crawler.js';
 import { PackageDiagnoser } from './tools/package-diagnoser.js';
+import { EnhancedSearcher, multiSearch, smartSearch, showCacheStats, clearCache } from './tools/enhanced-search.js';
 import { execa } from 'execa';
 import chalk from 'chalk';
 import ora from 'ora';
@@ -206,6 +207,62 @@ program
   .action(async (url, options, cmd) => {
     const globalOpts = cmd.parent.opts();
     await extractWebsiteInfo(url, { ...globalOpts, ...options });
+  });
+
+// Enhanced Search commands (NEW!)
+program
+  .command('multi-search <query>')
+  .description('Search across multiple engines simultaneously')
+  .option('-e, --engines <engines>', 'Comma-separated list of engines (e.g., google,bing,duckduckgo)', '')
+  .option('-n, --limit <number>', 'Maximum total results', '20')
+  .option('--max-per-engine <number>', 'Maximum results per engine', '10')
+  .option('--no-deduplicate', 'Disable result deduplication')
+  .option('--sort-by <sort>', 'Sort by: relevance, date, engine, position', 'relevance')
+  .option('--timeout <ms>', 'Timeout per engine in ms', '10000')
+  .option('--cache', 'Enable result caching', true)
+  .option('--cache-ttl <seconds>', 'Cache TTL in seconds', '3600')
+  .option('--verbose', 'Show detailed output', false)
+  .action(async (query, options, cmd) => {
+    const globalOpts = cmd.parent.opts();
+    const engines = options.engines ? options.engines.split(',') : undefined;
+    await multiSearch(query, { 
+      ...globalOpts, 
+      ...options,
+      engines,
+    });
+  });
+
+program
+  .command('smart-search <query>')
+  .description('Intelligent search with automatic engine selection')
+  .option('--query-type <type>', 'Query type: general, code, academic, news, video, auto', 'auto')
+  .option('--no-auto-engines', 'Disable automatic engine selection')
+  .option('--language-priority <langs>', 'Language priority (comma-separated, e.g., en,zh)', '')
+  .option('-n, --limit <number>', 'Maximum results', '20')
+  .option('--verbose', 'Show detailed output', false)
+  .action(async (query, options, cmd) => {
+    const globalOpts = cmd.parent.opts();
+    const languagePriority = options.languagePriority ? options.languagePriority.split(',') : undefined;
+    await smartSearch(query, {
+      ...globalOpts,
+      ...options,
+      languagePriority,
+    });
+  });
+
+program
+  .command('search-cache')
+  .description('Search cache management')
+  .option('--stats', 'Show cache statistics', false)
+  .option('--clear', 'Clear all cached results', false)
+  .action(async (options, cmd) => {
+    const globalOpts = cmd.parent.opts();
+    
+    if (options.clear) {
+      await clearCache();
+    } else if (options.stats || !options.clear) {
+      await showCacheStats();
+    }
   });
 
 program.parse(process.argv);

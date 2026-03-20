@@ -63,3 +63,4 @@ credentials/
 
 # Build configuration overrides
 tsconfig.tsbuildinfo
+.search-cache/  
