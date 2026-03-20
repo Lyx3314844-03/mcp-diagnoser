@@ -270,11 +270,14 @@ export class EnhancedSearcher {
       duplicates = beforeDedup - deduplicated.length;
     }
 
-    // Sort results
-    const sorted = this.sortResults(deduplicated, options.sortBy || 'relevance');
+    // Sort results by quality
+    const sorted = this.sortResultsByQuality(deduplicated, options.sortBy || 'relevance');
+
+    // Filter low-quality results
+    const filtered = this.filterLowQualityResults(sorted);
 
     // Limit total results
-    const finalResults = sorted.slice(0, options.limit || 20);
+    const finalResults = filtered.slice(0, options.limit || 20);
 
     const searchTime = Date.now() - startTime;
 
@@ -462,21 +465,113 @@ export class EnhancedSearcher {
   }
 
   /**
-   * Sort results by specified criteria
+   * Filter low-quality results after sorting
    */
-  private sortResults(results: SearchResult[], sortBy: string): SearchResult[] {
+  private filterLowQualityResults(results: SearchResult[]): SearchResult[] {
+    // Low quality domains to filter out
+    const lowQualityDomains = [
+      'w3.org', 'live.com', 'cloudflare.com',
+      'schemas.live.com', 'storage.live.com',
+      'microsoft.com', 'gstatic.com',
+      'hdslb.com', 'ytimg.com',
+      'facebook.com', 'twitter.com',
+      'pinterest.com', 'tumblr.com',
+      'fandom.com', 'wikia.com',
+      'amazonaws.com', 'azureedge.net',
+    ];
+    
+    return results.filter(result => {
+      // Filter low quality domains
+      if (lowQualityDomains.some(d => result.url.includes(d))) {
+        return false;
+      }
+      
+      // Filter very short titles
+      if (result.title.length < 3) {
+        return false;
+      }
+      
+      // Filter CDN and static resource URLs
+      if (result.url.includes('/static/') || 
+          result.url.includes('/assets/') ||
+          result.url.includes('.js') ||
+          result.url.includes('.css') ||
+          result.url.includes('.png') ||
+          result.url.includes('.jpg')) {
+        return false;
+      }
+      
+      return true;
+    });
+  }
+
+  /**
+   * Sort results by quality score
+   */
+  private sortResultsByQuality(results: SearchResult[], sortBy: string): SearchResult[] {
     return results.sort((a, b) => {
-      switch (sortBy) {
-        case 'position':
-          return (a.position || 0) - (b.position || 0);
-        case 'engine':
-          return (a.engine || '').localeCompare(b.engine || '');
-        case 'relevance':
-        default:
-          // Higher position = more relevant (assuming position 1 is best)
-          return (a.position || 0) - (b.position || 0);
+      if (sortBy === 'position') {
+        return (a.position || 0) - (b.position || 0);
+      } else if (sortBy === 'engine') {
+        return (a.engine || '').localeCompare(b.engine || '');
+      } else {
+        // Quality-based sorting
+        const scoreA = this.calculateQualityScore(a);
+        const scoreB = this.calculateQualityScore(b);
+        return scoreB - scoreA;
       }
     });
+  }
+  
+  /**
+   * Calculate quality score for a result
+   */
+  private calculateQualityScore(result: SearchResult): number {
+    let score = 0;
+    
+    // Title length (20-80 chars is ideal)
+    if (result.title.length >= 20 && result.title.length <= 80) {
+      score += 20;
+    } else if (result.title.length > 0) {
+      score += 10;
+    }
+    
+    // Has snippet
+    if (result.snippet && result.snippet.length > 50) {
+      score += 30;
+    } else if (result.snippet && result.snippet.length > 0) {
+      score += 15;
+    }
+    
+    // Trusted domains
+    const trustedDomains = [
+      'wikipedia.org', 'youtube.com', 'bilibili.com',
+      'github.com', 'stackoverflow.com', 'zhihu.com',
+      'baike.baidu.com', 'news.qq.com', 'weibo.com',
+      'tmall.com', 'jd.com', 'taobao.com',
+    ];
+    if (trustedDomains.some(d => result.url.includes(d))) {
+      score += 30;
+    }
+    
+    // Clean URL (not too long)
+    if (result.url.length < 150) {
+      score += 10;
+    }
+    
+    // Position bonus (higher position = more relevant)
+    if (result.position && result.position <= 3) {
+      score += 10;
+    }
+    
+    return score;
+  }
+
+  /**
+   * Sort results by specified criteria (deprecated, use sortResultsByQuality)
+   */
+  private sortResults(results: SearchResult[], sortBy: string): SearchResult[] {
+    return this.sortResultsByQuality(results, sortBy);
   }
 
   /**
@@ -492,20 +587,13 @@ export class EnhancedSearcher {
 
     let html = '';
     
-    // Try Playwright first for JavaScript-rendered pages
+    // Try Playwright first for JavaScript-rendered pages (best anti-bot bypass)
     try {
-      html = await this.fetchWithPlaywright(url);
+      html = await this.fetchWithPlaywright(url, engine.name);
     } catch (playwrightError) {
-      // Fallback to curl
+      // Fallback to curl with advanced anti-bot headers
       try {
-        const { stdout } = await execa('curl', [
-          '-s',
-          '-L',
-          '-A', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          '--max-time', '10',
-          url,
-        ], { timeout: 15000 });
-        html = stdout;
+        html = await this.fetchWithCurl(url, engine.name);
       } catch (curlError) {
         throw new Error(`Both Playwright and curl failed: ${curlError instanceof Error ? curlError.message : 'Unknown error'}`);
       }
@@ -524,38 +612,167 @@ export class EnhancedSearcher {
   }
 
   /**
-   * Fetch page content using Playwright for JavaScript-rendered pages
+   * Fetch page content using Playwright with advanced anti-bot bypass
    */
-  private async fetchWithPlaywright(url: string): Promise<string> {
-    const { chromium } = await import('playwright');
+  private async fetchWithPlaywright(url: string, engine: string): Promise<string> {
+    const playwright = await import('playwright');
     
-    const browser = await chromium.launch({ 
+    // Launch browser with anti-detection flags
+    const browser = await playwright.chromium.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+        '--window-size=1920,1080',
+        '--disable-blink-features=AutomationControlled',
+      ],
     });
     
     try {
+      // Create context with realistic fingerprints
       const context = await browser.newContext({
-        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        userAgent: this.getRandomUserAgent(),
         viewport: { width: 1920, height: 1080 },
+        locale: 'zh-CN',
+        timezoneId: 'Asia/Shanghai',
+        extraHTTPHeaders: {
+          'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Upgrade-Insecure-Requests': '1',
+          'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120"',
+          'Sec-Ch-Ua-Mobile': '?0',
+          'Sec-Ch-Ua-Platform': '"Windows"',
+        },
       });
       
       const page = await context.newPage();
+      
+      // Inject stealth scripts to bypass bot detection
+      await page.addInitScript(`() => {
+        // Override the navigator.webdriver property
+        Object.defineProperty(navigator, 'webdriver', {
+          get: () => false,
+        });
+        
+        // Override plugins
+        Object.defineProperty(navigator, 'plugins', {
+          get: () => [1, 2, 3, 4, 5],
+        });
+        
+        // Override languages
+        Object.defineProperty(navigator, 'languages', {
+          get: () => ['zh-CN', 'zh', 'en'],
+        });
+        
+        // Mock WebGL vendor
+        const getParameter = WebGLRenderingContext.prototype.getParameter;
+        WebGLRenderingContext.prototype.getParameter = function(parameter) {
+          if (parameter === 37445) return 'Intel Inc.';
+          if (parameter === 37446) return 'Intel Iris OpenGL Engine';
+          return getParameter.call(this, parameter);
+        };
+      }`);
+      
+      // Random delay before navigation
+      await page.waitForTimeout(this.randomInt(1000, 3000));
+      
       await page.goto(url, { 
-        waitUntil: 'domcontentloaded',
-        timeout: 30000 
+        waitUntil: 'networkidle',
+        timeout: 30000,
       });
       
       // Wait for search results to load
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(this.randomInt(2000, 4000));
+      
+      // Detect CAPTCHA
+      const captchaDetected = await page.evaluate(`() => {
+        const body = document.querySelector('body');
+        if (!body) return false;
+        const html = body.innerHTML;
+        return html.includes('captcha') || 
+               html.includes('验证') ||
+               html.includes('security check');
+      }`);
+      
+      if (captchaDetected) {
+        console.log('⚠️ CAPTCHA detected, waiting...');
+        await page.waitForTimeout(5000);
+      }
       
       const html = await page.content();
-      await browser.close();
       return html;
     } catch (error) {
       await browser.close().catch(() => {});
       throw error;
+    } finally {
+      await browser.close();
     }
+  }
+
+  /**
+   * Fetch page content using curl with advanced anti-bot headers
+   */
+  private async fetchWithCurl(url: string, engine: string): Promise<string> {
+    const { stdout } = await execa('curl', [
+      '-s',
+      '-L',
+      '--compressed',
+      '-A', this.getRandomUserAgent(),
+      '-H', 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+      '-H', 'Accept-Language: zh-CN,zh;q=0.9,en;q=0.8',
+      '-H', 'Accept-Encoding: gzip, deflate, br',
+      '-H', 'Upgrade-Insecure-Requests: 1',
+      '-H', 'Sec-Fetch-Dest: document',
+      '-H', 'Sec-Fetch-Mode: navigate',
+      '-H', 'Sec-Fetch-Site: none',
+      '-H', 'Sec-Fetch-User: ?1',
+      '-H', 'Cache-Control: max-age=0',
+      '-H', 'Connection: keep-alive',
+      '--max-time', '15',
+      '--retry', '2',
+      '--retry-delay', '1',
+      url,
+    ], { 
+      timeout: 20000,
+      env: {
+        CURL_SSL_BACKEND: 'openssl',
+      },
+    });
+    
+    return stdout;
+  }
+
+  /**
+   * Get random user agent to avoid fingerprinting
+   */
+  private getRandomUserAgent(): string {
+    const userAgents = [
+      // Chrome on Windows
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36',
+      // Firefox on Windows
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0',
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0',
+      // Edge on Windows
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0',
+      // Safari on macOS
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
+      // Chrome on macOS
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    ];
+    
+    return userAgents[Math.floor(Math.random() * userAgents.length)];
+  }
+
+  /**
+   * Generate random integer in range
+   */
+  private randomInt(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
   /**
@@ -590,6 +807,10 @@ export class EnhancedSearcher {
     } else if (engine.name === 'Bing') {
       url.searchParams.set('cc', options.region || 'US');
       url.searchParams.set('setlang', options.language || 'en');
+    } else if (engine.name === 'DuckDuckGo') {
+      // Use DuckDuckGo HTML version for better parsing
+      url.searchParams.set('kh', '1');
+      url.searchParams.set('kl', 'wt-wt');
     }
 
     return url.toString();
@@ -600,7 +821,19 @@ export class EnhancedSearcher {
    */
   private parseSearchResults(html: string, engine: string): SearchResult[] {
     const results: SearchResult[] = [];
-    const normalizedHtml = html.replace(/\s+/g, ' ').toLowerCase();
+    
+    // Blocked domains - filter out useless results
+    const blockedDomains = [
+      'google.com', 'bing.com', 'duckduckgo.com',
+      'w3.org', 'live.com', 'cloudflare.com',
+      'schemas.live.com', 'storage.live.com',
+      'microsoft.com', 'gstatic.com', 'googleusercontent.com',
+      'hdslb.com', 'bilibili.com', // Filter out CDN domains
+      'youtube.com', 'ytimg.com',
+      'facebook.com', 'twitter.com',
+      'pinterest.com', 'tumblr.com',
+      'fandom.com', 'wikia.com',
+    ];
     
     // Different engines have different result containers
     const selectors: Record<string, { pattern: RegExp; title: RegExp; url: RegExp; snippet: RegExp }> = {
@@ -637,7 +870,7 @@ export class EnhancedSearcher {
     
     while ((match = selector.pattern.exec(html)) !== null) {
       containers.push(match[0]);
-      if (containers.length >= 15) break; // Limit containers
+      if (containers.length >= 20) break;
     }
     
     // Extract data from each container
@@ -655,6 +888,7 @@ export class EnhancedSearcher {
             .replace(/&amp;/g, '&')
             .replace(/&lt;/g, '<')
             .replace(/&gt;/g, '>')
+            .replace(/\s+/g, ' ')
             .trim();
         }
         
@@ -664,7 +898,7 @@ export class EnhancedSearcher {
         if (urlMatch) {
           url = urlMatch[1]
             .replace(/&amp;/g, '&')
-            .split('&')[0]; // Remove tracking params
+            .split('&')[0];
         }
         
         // Extract snippet
@@ -679,14 +913,7 @@ export class EnhancedSearcher {
         }
         
         // Validate and add result
-        if (url && 
-            url.startsWith('http') && 
-            !url.includes('google.') && 
-            !url.includes('bing.') &&
-            !url.includes('duckduckgo.') &&
-            !seenUrls.has(url) &&
-            title.length > 0) {
-          
+        if (this.isValidResult(url, title, blockedDomains, seenUrls)) {
           seenUrls.add(url);
           results.push({
             title: title.substring(0, 200),
@@ -697,12 +924,11 @@ export class EnhancedSearcher {
           });
         }
       } catch (error) {
-        // Skip malformed results
         continue;
       }
     }
     
-    // Fallback: extract any valid URLs with titles
+    // Fallback: extract any valid URLs
     if (results.length === 0) {
       const urlRegex = /https?:\/\/[^\s"'<>)]+/g;
       const urls = html.match(urlRegex) || [];
@@ -713,14 +939,10 @@ export class EnhancedSearcher {
           .replace(/&sa=[^&]+/, '')
           .split('&')[0];
         
-        if (!seenUrls.has(cleanUrl) &&
-            !cleanUrl.includes('google.') &&
-            !cleanUrl.includes('bing.') &&
-            !cleanUrl.includes('duckduckgo.') &&
-            cleanUrl.startsWith('http')) {
+        if (this.isValidResult(cleanUrl, '', blockedDomains, seenUrls)) {
           seenUrls.add(cleanUrl);
           results.push({
-            title: cleanUrl.split('/')[2] || cleanUrl,
+            title: this.extractTitleFromUrl(cleanUrl),
             url: cleanUrl,
             snippet: '',
             position: results.length + 1,
@@ -733,6 +955,59 @@ export class EnhancedSearcher {
     }
     
     return results.slice(0, 10);
+  }
+  
+  /**
+   * Validate search result
+   */
+  private isValidResult(
+    url: string,
+    title: string,
+    blockedDomains: string[],
+    seenUrls: Set<string>
+  ): boolean {
+    // Must have URL
+    if (!url || !url.startsWith('http')) return false;
+    
+    // Filter search engine domains only
+    const searchEngineDomains = [
+      'google.com', 'bing.com', 'duckduckgo.com',
+      'yahoo.com', 'yandex.com',
+    ];
+    if (searchEngineDomains.some(d => url.includes(d))) return false;
+    
+    // Filter template URLs with placeholders
+    if (url.includes('{') || url.includes('}')) return false;
+    
+    // Filter very long URLs
+    if (url.length > 1000) return false;
+    
+    // Filter duplicate URLs
+    if (seenUrls.has(url)) return false;
+    
+    // Filter obvious error pages
+    if (url.includes('error_204') || url.includes('signin')) return false;
+    
+    return true;
+  }
+  
+  /**
+   * Extract title from URL
+   */
+  private extractTitleFromUrl(url: string): string {
+    try {
+      const urlObj = new URL(url);
+      const hostname = urlObj.hostname.replace('www.', '');
+      const path = urlObj.pathname.split('/').filter(Boolean);
+      
+      if (path.length > 0) {
+        return path[path.length - 1].replace(/[-_]/g, ' ');
+      }
+      
+      return hostname;
+    } catch {
+      return url;
+    }
   }
 
   /**
