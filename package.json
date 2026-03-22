@@ -1,6 +1,6 @@
 {
   "name": "mcp-diagnoser",
-  "version": "2.0.0",
+  "version": "2.6.0",
   "description": "Comprehensive MCP diagnostic tool with advanced multi-engine search, anti-bot bypass, and package diagnosis",
   "main": "dist/index.js",
   "bin": {
@@ -39,12 +39,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/YOUR_USERNAME/mcp-diagnoser.git"
+    "url": "https://github.com/Lyx3314844-03/mcp-diagnoser.git"
   },
   "bugs": {
-    "url": "https://github.com/YOUR_USERNAME/mcp-diagnoser/issues"
+    "url": "https://github.com/Lyx3314844-03/mcp-diagnoser/issues"
   },
-  "homepage": "https://github.com/YOUR_USERNAME/mcp-diagnoser#readme",
+  "homepage": "https://github.com/Lyx3314844-03/mcp-diagnoser#readme",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.1",
     "chalk": "^4.1.2",

@@ -10,14 +10,35 @@ All notable changes to MCP Diagnoser will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.6.0] - 2026-03-22
 
-### Planned
-- Add support for more package managers (NuGet, Composer)
-- Add interactive TUI mode
-- Add configuration file validation
-- Add performance profiling for slow diagnostics
-- Add plugin system for custom diagnostics
+### Added
+- **Playwright Browser Automation** - Full browser automation support for web testing
+- **Enhanced MCP Server Integration** - Improved compatibility with MCP protocol servers
+- **Advanced Diagnostic Reports** - More detailed and comprehensive diagnostic output
+- **Multi-Platform Support** - Better support for Windows, Linux, and macOS
+
+### Changed
+- Updated Playwright dependency to latest version
+- Improved error handling and reporting
+- Enhanced performance for large-scale diagnostics
+
+### Fixed
+- Various bug fixes and stability improvements
+- Improved browser detection logic
+- Fixed edge cases in package manager detection
+
+## [2.0.0] - 2026-03-21
+
+### Added
+- **Advanced Multi-Engine Search** - Support for 37+ search engines
+- **Anti-Bot Bypass** - Enhanced bypass mechanisms for search engines
+- **Playwright Integration** - Browser automation for complex web interactions
+- **Package Diagnosis Module** - Complete package installation diagnostic system
+
+### Changed
+- Major version bump with significant feature additions
+- Improved diagnostic performance with smart caching
 
 ## [1.3.0] - 2026-03-20
 
