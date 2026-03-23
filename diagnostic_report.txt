@@ -1,0 +1,243 @@
+- Initializing MCP Diagnoser...
+√ Diagnosis complete
+
+════════════════════════════════════════════════════════════
+  MCP Diagnoser - Diagnostic Report
+════════════════════════════════════════════════════════════
+  Generated: 2026-03-20T18:11:59.554Z
+────────────────────────────────────────────────────────────
+
+📊 Summary
+╔═══════════════╤════╗
+║ Total Servers │ 31 ║
+╟───────────────┼────╢
+║ ✅ OK         │ 31 ║
+╟───────────────┼────╢
+║ ⚠️  Warnings  │ 0  ║
+╟───────────────┼────╢
+║ ❌ Errors     │ 0  ║
+╚═══════════════╧════╝
+
+
+🔧 Language Runtimes
+╔══════════╤════════╤══════════╤═════════════════════════════════════════════════════════════╗
+║ Language │ Status │ Version  │ Path                                                        ║
+╟──────────┼────────┼──────────┼─────────────────────────────────────────────────────────────╢
+║ node     │ ✓      │ v22.22.1 │ C:\Program Files\nodejs\node.exe                            ║
+╟──────────┼────────┼──────────┼─────────────────────────────────────────────────────────────╢
+║ python   │ ✓      │ 3.13.12  │ C:\Program Files\Python313\python.exe                       ║
+╟──────────┼────────┼──────────┼─────────────────────────────────────────────────────────────╢
+║ java     │ ✓      │ 25.0.2   │ C:\Program Files\Common Files\Oracle\Java\javapath\java.exe ║
+╟──────────┼────────┼──────────┼─────────────────────────────────────────────────────────────╢
+║ go       │ ✓      │ 1.26.1   │ C:\Program Files\Go\bin\go.exe                              ║
+╟──────────┼────────┼──────────┼─────────────────────────────────────────────────────────────╢
+║ cargo    │ ✓      │ 1.94.0   │ C:\Program Files\Rust stable MSVC 1.94\bin\cargo.exe        ║
+╟──────────┼────────┼──────────┼─────────────────────────────────────────────────────────────╢
+║ dotnet   │ ✗      │ N/A      │ Not found                                                   ║
+╟──────────┼────────┼──────────┼─────────────────────────────────────────────────────────────╢
+║ ruby     │ ✗      │ N/A      │ Not found                                                   ║
+╟──────────┼────────┼──────────┼─────────────────────────────────────────────────────────────╢
+║ php      │ ✗      │ N/A      │ Not found                                                   ║
+╟──────────┼────────┼──────────┼─────────────────────────────────────────────────────────────╢
+║ swift    │ ✗      │ N/A      │ Not found                                                   ║
+╟──────────┼────────┼──────────┼─────────────────────────────────────────────────────────────╢
+║ kotlinc  │ ✗      │ N/A      │ Not found                                                   ║
+╚══════════╧════════╧══════════╧═════════════════════════════════════════════════════════════╝
+
+
+📦 Package Status
+╔════════════════╤════╗
+║ Total Packages │ 31 ║
+╟────────────────┼────╢
+║ ✅ Installed   │ 31 ║
+╟────────────────┼────╢
+║ ❌ Missing     │ 0  ║
+╚════════════════╧════╝
+
+
+🔍 Server Diagnostics
+
+✓ DrissionPageMCP
+  Runtime: python
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ diagnoser
+  Runtime: node
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ playwright
+  Runtime: node
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ chrome-devtools
+  Runtime: node
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ windows-mcp
+  Runtime: python
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ github
+  Runtime: node
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ context7
+  Runtime: node
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ serena
+  Runtime: python
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ apify
+  Runtime: node
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ puppeteer
+  Runtime: node
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ exa
+  Runtime: node
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ search1api
+  Runtime: node
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ yt-dlp
+  Runtime: node
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ owlex
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ code-review
+  Runtime: node
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ js-reverse
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ video-fetch
+  Runtime: node
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ terminal
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ fetch
+  Runtime: node
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ codegraph
+  Runtime: node
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ firecrawl
+  Runtime: node
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ codescalpel
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ dependency-mcp
+  Runtime: node
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ gitnexus
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ travel-flight
+  Runtime: python
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ travel-hotel
+  Runtime: python
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ travel-event
+  Runtime: python
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ travel-geocoder
+  Runtime: python
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ travel-weather
+  Runtime: python
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ travel-finance
+  Runtime: python
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+✓ rag
+  Command Found: Yes
+  Dependencies OK: Yes
+  Config Valid: Yes
+
+  ✅ All MCP servers are healthy!
+
+════════════════════════════════════════════════════════════
+

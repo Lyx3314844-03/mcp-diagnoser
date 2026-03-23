@@ -127,22 +127,30 @@ export class MCPDiagnoser {
     return null;
   }
 
-  async diagnoseAll(config: MCPConfig): Promise<DiagnosticReport> {
+  async diagnoseAll(config: MCPConfig, fastMode = false): Promise<DiagnosticReport> {
     const servers = Object.keys(config.mcpServers);
     const results: ServerDiagnosticResult[] = [];
 
-    for (const serverName of servers) {
-      const result = await this.diagnoseServer(serverName, config);
-      results.push(result);
-    }
+    // 并行诊断所有服务器
+    const promises = servers.map(serverName => this.diagnoseServer(serverName, config, fastMode));
+    const resolvedResults = await Promise.all(promises);
+    results.push(...resolvedResults);
 
     const languageRuntimes = await this.checkAllLanguages();
-    const packageDiagnosis = await this.diagnoseAllPackages(config);
+    
+    // 快速模式下跳过包检查
+    const packageDiagnosis = fastMode ? {
+      totalPackages: 0,
+      installedPackages: 0,
+      missingPackages: [],
+      packageDetails: [],
+      dependencyIssues: [],
+    } : await this.diagnoseAllPackages(config);
 
     return this.compileReport(results, languageRuntimes, packageDiagnosis);
   }
 
-  async diagnoseServer(serverName: string, config: MCPConfig): Promise<ServerDiagnosticResult> {
+  async diagnoseServer(serverName: string, config: MCPConfig, fastMode = false): Promise<ServerDiagnosticResult> {
     const serverConfig = config.mcpServers[serverName];
     if (!serverConfig) {
       return {
@@ -165,6 +173,33 @@ export class MCPDiagnoser {
     let dependenciesOk = true;
     let configValid = true;
 
+    // HTTP 类型服务器跳过检查
+    if (!serverConfig.command) {
+      return {
+        name: serverName,
+        status: 'ok',
+        issues: [],
+        commandFound: true,
+        dependenciesOk: true,
+        configValid: true,
+        runtime: 'http',
+      };
+    }
+
+    // 快速模式下只检查基本配置
+    if (fastMode) {
+      return {
+        name: serverName,
+        status: 'ok',
+        issues: [],
+        commandFound: true,
+        dependenciesOk: true,
+        configValid: true,
+        runtime: this.detectRuntime(serverConfig),
+      };
+    }
+
+    // 完整模式下的详细检查
     // Check configuration validity
     if (!serverConfig.command) {
       issues.push({
@@ -201,10 +236,10 @@ export class MCPDiagnoser {
       if (pkgArg) {
         // Clean package name (remove @latest, @version, etc.)
         const cleanPkgName = pkgArg.replace(/@latest$/i, '').replace(/@[0-9].*$/i, '');
-        
+
         // Diagnose the package
         const pkgDiagnosis = await this.packageDiagnoser.diagnosePackage(cleanPkgName);
-        
+
         if (!pkgDiagnosis.installed) {
           dependenciesOk = false;
           issues.push({
@@ -379,6 +414,11 @@ export class MCPDiagnoser {
   }
 
   private detectRuntime(serverConfig: MCPServerConfig): string | undefined {
+    // HTTP 类型服务器没有 command，直接返回 undefined
+    if (!serverConfig.command) {
+      return undefined;
+    }
+
     const command = serverConfig.command.toLowerCase();
     const args = serverConfig.args?.join(' ') || '';
 

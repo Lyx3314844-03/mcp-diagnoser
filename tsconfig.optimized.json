@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": ["ES2022"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "moduleResolution": "node",
+    
+    // 性能优化选项
+    "incremental": true,
+    "tsBuildInfoFile": "./dist/tsbuildinfo",
+    "removeComments": true,
+    "noEmitHelpers": false,
+    "importHelpers": true
+  },
+  "include": ["src/index-optimized.ts", "src/core/**/*", "src/utils/**/*", "src/tools/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+}

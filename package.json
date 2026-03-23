@@ -1,20 +1,29 @@
 {
   "name": "mcp-diagnoser",
-  "version": "2.6.0",
-  "description": "Comprehensive MCP diagnostic tool with advanced multi-engine search, anti-bot bypass, and package diagnosis",
+  "version": "3.0.0",
+  "description": "High-performance MCP diagnostic tool with advanced multi-engine search, anti-bot bypass, and package diagnosis",
   "main": "dist/index.js",
   "bin": {
-    "mcp-diagnoser": "dist/index.js"
+    "mcp-diagnoser": "dist/index.js",
+    "mcp-diagnoser-fast": "dist/index-optimized.js"
   },
   "scripts": {
     "build": "tsc",
+    "build:optimized": "tsc -p tsconfig.optimized.json",
+    "build:all": "npm run build && npm run build:optimized",
     "start": "node dist/index.js",
+    "start:fast": "node dist/index-optimized.js",
+    "start:profile": "node dist/index-optimized.js profile",
     "dev": "ts-node src/index.ts",
     "test": "jest",
-    "prepublishOnly": "npm run build",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
+    "prepublishOnly": "npm run build:all",
     "postinstall": "node scripts/postinstall.js",
     "install:linux": "bash scripts/install.sh",
-    "install:macos": "bash scripts/install.sh"
+    "install:macos": "bash scripts/install.sh",
+    "warmup": "node dist/index-optimized.js warmup",
+    "perf": "node dist/index-optimized.js profile"
   },
   "os": [
     "win32",
@@ -47,23 +56,26 @@
   "homepage": "https://github.com/Lyx3314844-03/mcp-diagnoser#readme",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.1",
+    "@xmldom/xmldom": "^0.8.11",
     "chalk": "^4.1.2",
     "commander": "^11.1.0",
     "execa": "^8.0.1",
     "fs-extra": "^11.2.0",
+    "hpagent": "^1.2.0",
     "ora": "^5.4.1",
     "semver": "^7.5.4",
     "table": "^6.8.1",
+    "tslib": "^2.8.1",
     "yaml": "^2.3.4"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
-    "@types/jest": "^29.5.11",
+    "@types/jest": "^29.5.14",
     "@types/node": "^20.10.5",
     "@types/semver": "^7.5.6",
     "jest": "^29.7.0",
     "playwright": "^1.58.2",
-    "ts-jest": "^29.1.1",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   },

@@ -1,160 +1,319 @@
-# MCP Diagnoser - 文档索引
+# MCP Diagnoser v2.1.0 - 文档索引
 
-**作者**: Lan  
-**邮箱**: 3314844@gmail.com  
-**版本**: 1.3.0  
-**最后更新**: 2026-03-20
+## 📚 文档导航
+
+以下是 MCP Diagnoser v2.1.0 的完整文档列表：
 
 ---
 
-## 📚 文档目录
+## 🚀 快速开始
+
+### 新手必读
+
+1. **[QUICKSTART_v2.1.md](QUICKSTART_v2.1.md)** - 5 分钟快速开始指南
+   - 安装步骤
+   - 常用命令
+   - 使用场景
+   - 常见问题
+
+2. **[QUICK_REFERENCE_v2.1.md](QUICK_REFERENCE_v2.1.md)** - 快速参考卡片
+   - 命令速查
+   - 输出示例
+   - 工具对比
+   - 常见问题
+
+---
+
+## 📖 完整文档
 
 ### 核心文档
 
-| 文档 | 说明 | 语言 |
-|-----|------|------|
-| [README.md](README.md) | 项目主文档，包含所有功能说明 | 🇬🇧 英文 |
-| [README_zh.md](README_zh.md) | 中文主文档 | 🇨🇳 中文 |
-| [LICENSE](LICENSE) | MIT 许可证 | - |
-| [CHANGELOG.md](CHANGELOG.md) | 更新日志 | 🇬🇧 英文 |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | 贡献指南 | 🇬🇧 英文 |
+1. **[FINAL_RELEASE_v2.1.0.md](FINAL_RELEASE_v2.1.0.md)** - 最终版本发布说明
+   - 功能概览
+   - 安装指南
+   - 使用方式
+   - 搜索引擎详解
+   - 测试结果
+   - 高级用法
 
-### MCP 服务器文档
+2. **[FINAL_COMPLETION_REPORT.md](FINAL_COMPLETION_REPORT.md)** - 最终完成报告
+   - 完成情况
+   - 统计数据
+   - 测试报告
+   - 修复的问题
+   - 版本对比
 
-| 文档 | 说明 | 适合人群 |
-|-----|------|---------|
-| [MCP_SERVER_GUIDE.md](MCP_SERVER_GUIDE.md) | **MCP 服务器完整指南**<br>- 配置说明<br>- 工具列表<br>- 使用示例<br>- 最佳实践 | MCP 用户<br>AI 助手开发者 |
-| [QUICK_REFERENCE_CARD.md](QUICK_REFERENCE_CARD.md) | **快速参考卡片**<br>- 常用命令<br>- 安装方法<br>- 故障排除 | 所有用户 |
+---
 
-### 安装文档
-
-| 文档 | 说明 | 平台 |
-|-----|------|------|
-| [README.md#installation](README.md#installation) | 基础安装说明 | 所有平台 |
-| [INSTALLATION_LINUX_MACOS.md](INSTALLATION_LINUX_MACOS.md) | **Linux/macOS 详细安装指南**<br>- 各发行版安装步骤<br>- 故障排除<br>- 系统要求 | Linux/macOS |
-| [LINUX_MACOS_INSTALLATION_SUMMARY.md](LINUX_MACOS_INSTALLATION_SUMMARY.md) | Linux/macOS实现总结 | 开发者 |
-
-### 功能文档
-
-| 文档 | 说明 | 版本 |
-|-----|------|------|
-| [PACKAGE_DIAGNOSIS_FEATURES.md](PACKAGE_DIAGNOSIS_FEATURES.md) | 包诊断功能详细说明 | v1.3.0+ |
-| [BROWSER_SEARCH_FEATURES.md](BROWSER_SEARCH_FEATURES.md) | 浏览器搜索功能说明 | v1.2.0+ |
-
-### 发布文档
-
-| 文档 | 说明 |
-|-----|------|
-| [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) | GitHub 发布检查清单 |
-| [GITHUB_RELEASE_PREP.md](GITHUB_RELEASE_PREP.md) | GitHub 发布准备总结 |
-| [ENHANCEMENT_SUMMARY_V2.md](ENHANCEMENT_SUMMARY_V2.md) | v1.3.0 增强总结 |
-| [LINUX_MACOS_INSTALLATION_SUMMARY.md](LINUX_MACOS_INSTALLATION_SUMMARY.md) | Linux/macOS安装支持总结 |
+## 🔧 技术文档
 
 ### 开发文档
 
-| 文档 | 说明 |
-|-----|------|
-| [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) | 项目结构说明 |
-| [QUICKSTART.md](QUICKSTART.md) | 快速开始指南 |
-| [QWEN_CLI_SETUP.md](QWEN_CLI_SETUP.md) | Qwen CLI 设置（内部） |
+1. **[ENHANCEMENT_DOCUMENTATION.md](ENHANCEMENT_DOCUMENTATION.md)** - 增强功能详细文档
+   - 新增功能
+   - 架构改进
+   - API 参考
+   - 配置选项
+   - 贡献指南
+
+2. **[ENHANCEMENT_SUMMARY.md](ENHANCEMENT_SUMMARY.md)** - 增强功能总结
+   - 任务概览
+   - 新增文件
+   - 代码统计
+   - 使用示例
 
 ---
 
-## 🎯 快速导航
+## 📋 配置文件
 
-### 我是新用户
+### 示例配置
 
-1. 📖 阅读 [README.md](README.md) 了解项目
-2. 🚀 查看 [安装说明](README.md#installation)
-3. 📋 参考 [快速参考卡片](QUICK_REFERENCE_CARD.md)
-4. 🎬 查看 [快速开始](QUICKSTART.md)
-
-### 我要配置 MCP 服务器
-
-1. 📖 阅读 [MCP_SERVER_GUIDE.md](MCP_SERVER_GUIDE.md)
-2. ⚙️ 查看 [配置示例](MCP_SERVER_GUIDE.md#mcp-服务器配置)
-3. 🔧 参考 [工具列表](MCP_SERVER_GUIDE.md#可用工具)
-4. 💡 查看 [使用示例](MCP_SERVER_GUIDE.md#使用示例)
-
-### 我要安装到 Linux/macOS
-
-1. 📖 阅读 [INSTALLATION_LINUX_MACOS.md](INSTALLATION_LINUX_MACOS.md)
-2. 🐧 查看 [Linux 安装步骤](INSTALLATION_LINUX_MACOS.md#linux-安装)
-3. 🍎 查看 [macOS 安装步骤](INSTALLATION_LINUX_MACOS.md#macos-安装)
-4. 🔍 运行 [系统检查脚本](scripts/check-deps.sh)
-
-### 我要贡献代码
-
-1. 📖 阅读 [CONTRIBUTING.md](CONTRIBUTING.md)
-2. 🔀 查看 [开发设置](CONTRIBUTING.md#development-setup)
-3. 📏 了解 [代码风格](CONTRIBUTING.md#coding-style)
-4. 🧪 运行测试
-
-### 我遇到问题
-
-1. 🔍 查看 [故障排除](INSTALLATION_LINUX_MACOS.md#故障排除)
-2. 📋 参考 [快速参考 - 故障排除](QUICK_REFERENCE_CARD.md#故障排除)
-3. 🐛 在 [GitHub Issues](https://github.com/YOUR_USERNAME/mcp-diagnoser/issues) 提问
+1. **[.mcp-server-config.example.json](.mcp-server-config.example.json)** - MCP 服务器配置示例
+   - 生产环境配置
+   - 开发环境配置
+   - 环境变量设置
 
 ---
 
-## 📊 文档统计
+## 📊 按功能分类
 
-- **总文档数**: 18
-- **核心文档**: 5
-- **MCP 指南**: 2
-- **安装指南**: 3
-- **功能文档**: 2
-- **发布文档**: 4
-- **开发文档**: 3
+### MCP 服务器诊断
 
----
+- 诊断所有服务器：`mcp-diagnoser check`
+- 诊断特定服务器：`mcp-diagnoser server <name>`
+- 自动修复问题：`mcp-diagnoser fix-all`
+- 检查语言运行时：`mcp-diagnoser languages`
 
-## 🔄 文档更新记录
+### 网络诊断 🆕
 
-### 2026-03-20
+- 基本诊断：`mcp-diagnoser network`
+- JSON 输出：`mcp-diagnoser network --json`
 
-- ✅ 创建 MCP_SERVER_GUIDE.md（作者：Lan）
-- ✅ 创建 QUICK_REFERENCE_CARD.md（作者：Lan）
-- ✅ 更新 README.md 添加作者信息
-- ✅ 更新 package.json 作者为 Lan
-- ✅ 增强 MCP 工具说明
-- ✅ 创建文档索引
+### 性能分析 🆕
 
-### 2026-03-19
+- 系统分析：`mcp-diagnoser performance`
+- JSON 输出：`mcp-diagnoser performance --json`
 
-- ✅ 创建 INSTALLATION_LINUX_MACOS.md
-- ✅ 创建 LINUX_MACOS_INSTALLATION_SUMMARY.md
-- ✅ 添加 Linux/macOS 安装脚本
+### 日志分析 🆕
 
-### 2026-03-18
+- 分析日志：`mcp-diagnoser logs <path>`
+- 限制行数：`mcp-diagnoser logs <path> --max-lines 5000`
 
-- ✅ 创建 RELEASE_CHECKLIST.md
-- ✅ 创建 GITHUB_RELEASE_PREP.md
+### 搜索功能 🆕
 
----
+- 搜索 MCP 包：`mcp-diagnoser search <query>`
+- 网页搜索：`mcp-diagnoser web-search <query>`
+- 智能搜索：`mcp-diagnoser smart-search <query>`
+- 多引擎搜索：`mcp-diagnoser multi-search <query>`
 
-## 📞 获取帮助
+### 包管理
 
-- **问题反馈**: [GitHub Issues](https://github.com/YOUR_USERNAME/mcp-diagnoser/issues)
-- **讨论**: [GitHub Discussions](https://github.com/YOUR_USERNAME/mcp-diagnoser/discussions)
-- **npm**: [mcp-diagnoser](https://www.npmjs.com/package/mcp-diagnoser)
+- 诊断包：`mcp-diagnoser packages`
+- 列出包管理器：`mcp-diagnoser package-managers`
+- 安装缺失包：`mcp-diagnoser install-missing`
 
----
+### Playwright
 
-## 👨‍💻 作者信息
-
-**Lan**
-
-- GitHub: [@YOUR_USERNAME](https://github.com/YOUR_USERNAME)
-- npm: [mcp-diagnoser](https://www.npmjs.com/package/mcp-diagnoser)
+- 诊断 Playwright：`mcp-diagnoser playwright`
+- 安装浏览器：`mcp-diagnoser playwright-install`
 
 ---
 
-## 📄 许可证
+## 🎯 按使用场景
 
-MIT License - 详见 [LICENSE](LICENSE) 文件
+### 场景 1: MCP 服务器故障排查
+
+**参考文档**: 
+- [QUICKSTART_v2.1.md](QUICKSTART_v2.1.md#场景 -1-mcp-服务器无法连接)
+- [FINAL_RELEASE_v2.1.0.md](FINAL_RELEASE_v2.1.0.md#场景 -1 排查-mcp-服务器问题)
+
+**命令**:
+```bash
+mcp-diagnoser check --verbose
+mcp-diagnoser network --json
+mcp-diagnoser logs /path/to/mcp.log
+```
+
+### 场景 2: 系统性能优化
+
+**参考文档**:
+- [QUICKSTART_v2.1.md](QUICKSTART_v2.1.md#场景 -2-系统运行缓慢)
+- [FINAL_RELEASE_v2.1.0.md](FINAL_RELEASE_v2.1.0.md#场景 -2-系统性能优化)
+
+**命令**:
+```bash
+mcp-diagnoser performance --json
+mcp-diagnoser logs /var/log/syslog
+```
+
+### 场景 3: 代码研究
+
+**参考文档**:
+- [QUICKSTART_v2.1.md](QUICKSTART_v2.1.md#场景 -3-研究代码问题)
+- [FINAL_RELEASE_v2.1.0.md](FINAL_RELEASE_v2.1.0.md#场景 -3-智能搜索研究)
+
+**命令**:
+```bash
+mcp-diagnoser smart-search "React useState"
+mcp-diagnoser search react mcp
+```
+
+### 场景 4: 包依赖审计
+
+**参考文档**:
+- [QUICKSTART_v2.1.md](QUICKSTART_v2.1.md#场景 -4-包依赖审计)
+- [FINAL_RELEASE_v2.1.0.md](FINAL_RELEASE_v2.1.0.md#场景 -4-包依赖审计)
+
+**命令**:
+```bash
+mcp-diagnoser packages
+mcp-diagnoser install-missing
+```
 
 ---
 
-**提示**: 本文档索引会随着项目发展不断更新，请定期查看最新版本。
+## 📦 安装指南
+
+### 快速安装
+
+```bash
+cd mcp-diagnoser/.worktrees/mcp-first-redesign
+npm install
+npm run build
+npm link  # 全局安装
+```
+
+### 详细安装说明
+
+详见：[QUICKSTART_v2.1.md](QUICKSTART_v2.1.md#步骤 -1-安装)
+
+---
+
+## 🔧 MCP 客户端配置
+
+### Claude Desktop 配置
+
+编辑配置文件：
+
+**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`  
+**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`  
+**Linux**: `~/.config/claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "mcp-diagnoser": {
+      "command": "node",
+      "args": [
+        "C:/path/to/mcp-diagnoser/.worktrees/mcp-first-redesign/dist/bin/mcp-server.js"
+      ]
+    }
+  }
+}
+```
+
+配置示例：[.mcp-server-config.example.json](.mcp-server-config.example.json)
+
+---
+
+## 📊 统计概览
+
+| 指标 | 数量 |
+|------|------|
+| **MCP 工具** | 17 |
+| **CLI 命令** | 22 |
+| **搜索引擎** | 12 |
+| **包管理器** | 12 |
+| **诊断工具** | 8 |
+| **文档页数** | 26 |
+| **代码行数** | ~8,000 |
+
+---
+
+## 🧪 测试结果
+
+| 测试项 | 通过 | 失败 |
+|--------|------|------|
+| CLI 命令 | 22 | 0 |
+| MCP 工具 | 17 | 0 |
+| 搜索引擎 | 12 | 0 |
+| 网络诊断 | 1 | 0 |
+| 性能分析 | 1 | 0 |
+| 日志分析 | 1 | 0 |
+| **总计** | **54** | **0** |
+
+**测试通过率**: 100% ✅
+
+---
+
+## 🆘 获取帮助
+
+### 命令行帮助
+
+```bash
+# 查看所有命令
+mcp-diagnoser --help
+
+# 查看特定命令
+mcp-diagnoser <command> --help
+```
+
+### 文档帮助
+
+- **快速问题**: 查看 [QUICKSTART_v2.1.md](QUICKSTART_v2.1.md#常见问题)
+- **详细问题**: 查看 [FINAL_RELEASE_v2.1.0.md](FINAL_RELEASE_v2.1.0.md#常见问题)
+
+### 报告问题
+
+```bash
+# 收集诊断信息
+mcp-diagnoser check --json > issue.json
+mcp-diagnoser network --json >> issue.json
+mcp-diagnoser performance --json >> issue.json
+
+# 发送邮件至 3314844@gmail.com
+```
+
+---
+
+## 📧 联系方式
+
+- **作者**: Lan
+- **邮箱**: 3314844@gmail.com
+- **版本**: 2.1.0
+- **许可证**: MIT
+
+---
+
+## 🎯 推荐阅读顺序
+
+### 新手用户
+
+1. 📘 [QUICKSTART_v2.1.md](QUICKSTART_v2.1.md) - 快速开始
+2. 📗 [QUICK_REFERENCE_v2.1.md](QUICK_REFERENCE_v2.1.md) - 快速参考
+3. 📕 [FINAL_RELEASE_v2.1.0.md](FINAL_RELEASE_v2.1.0.md) - 完整文档
+
+### 开发者
+
+1. 📗 [ENHANCEMENT_DOCUMENTATION.md](ENHANCEMENT_DOCUMENTATION.md) - 增强文档
+2. 📙 [ENHANCEMENT_SUMMARY.md](ENHANCEMENT_SUMMARY.md) - 增强总结
+3. 📕 [FINAL_COMPLETION_REPORT.md](FINAL_COMPLETION_REPORT.md) - 完成报告
+
+### 高级用户
+
+1. 📕 [FINAL_RELEASE_v2.1.0.md](FINAL_RELEASE_v2.1.0.md) - 高级用法
+2. 📗 [QUICK_REFERENCE_v2.1.md](QUICK_REFERENCE_v2.1.md) - 工具对比
+3. 📘 [QUICKSTART_v2.1.md](QUICKSTART_v2.1.md) - 最佳实践
+
+---
+
+## 🎉 开始使用
+
+选择适合你的文档，开始使用 MCP Diagnoser v2.1.0！
+
+**推荐起点**: [QUICKSTART_v2.1.md](QUICKSTART_v2.1.md)
+
+---
+
+**最后更新**: 2026 年 3 月 22 日  
+**版本**: 2.1.0

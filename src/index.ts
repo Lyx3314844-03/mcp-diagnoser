@@ -18,7 +18,7 @@ import { execa } from 'execa';
 import chalk from 'chalk';
 import ora from 'ora';
 
-const version = '2.0.0';
+const version = '3.0.0';
 
 program
   .name('mcp-diagnoser')
@@ -29,7 +29,8 @@ program
   .option('-v, --verbose', 'Verbose output', false)
   .option('-j, --json', 'Output results as JSON', false)
   .option('--fix', 'Auto-fix detected issues', false)
-  .option('--deep', 'Perform deep diagnostic scan', false);
+  .option('--deep', 'Perform deep diagnostic scan', false)
+  .option('--fast', 'Fast mode - skip package and runtime checks', false);
 
 // Diagnosis commands
 program
@@ -281,11 +282,11 @@ program.parse(process.argv);
 
 async function runDiagnosis(options: any, serverName?: string) {
   const spinner = ora('Initializing MCP Diagnoser...').start();
-  
+
   try {
     const diagnoser = new MCPDiagnoser(options.config);
     spinner.text = 'Loading MCP configuration...';
-    
+
     const config = await diagnoser.loadConfig();
     if (!config) {
       spinner.fail('No MCP configuration found');
@@ -293,15 +294,15 @@ async function runDiagnosis(options: any, serverName?: string) {
       console.log('Please create a .mcp.json or mcp.json file in your home directory.');
       process.exit(1);
     }
-    
-    spinner.text = 'Analyzing MCP servers...';
-    
-    const results = serverName 
-      ? await diagnoser.diagnoseServer(serverName, config)
-      : await diagnoser.diagnoseAll(config);
-    
+
+    spinner.text = options.fast ? 'Quick scan of MCP servers...' : 'Analyzing MCP servers...';
+
+    const results = serverName
+      ? await diagnoser.diagnoseServer(serverName, config, options.fast)
+      : await diagnoser.diagnoseAll(config, options.fast);
+
     spinner.succeed('Diagnosis complete');
-    
+
     if (options.json) {
       console.log(JSON.stringify(results, null, 2));
     } else {
@@ -324,11 +325,11 @@ async function runDiagnosis(options: any, serverName?: string) {
         diagnoser.printReport(report, options.verbose);
       }
     }
-    
+
     if (options.fix && 'servers' in results) {
       await diagnoser.applyFixes(results);
     }
-    
+
     process.exit('hasIssues' in results ? (results.hasIssues ? 1 : 0) : 0);
   } catch (error) {
     spinner.fail('Diagnosis failed');

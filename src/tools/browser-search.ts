@@ -1,5 +1,7 @@
 import { execa } from 'execa';
 import chalk from 'chalk';
+import { antiBotManager, delayManager } from '../utils/anti-bot.js';
+import { createUltraParser } from '../utils/html-parser-v3.js';
 
 export interface SearchEngine {
   name: string;
@@ -325,15 +327,19 @@ export class BrowserSearcher {
     }
 
     const startTime = Date.now();
-    
+
     // Build search URL
     const searchUrl = this.buildSearchUrl(engineConfig, query, options);
-    
-    // Perform search
+
+    // Wait for appropriate delay
+    const domain = new URL(searchUrl).hostname;
+    await delayManager.wait(domain);
+
+    // Perform search with anti-bot headers
     const results = await this.performSearch(searchUrl, engine);
-    
+
     const searchTime = Date.now() - startTime;
-    
+
     return {
       query,
       engine: engineConfig.name,
@@ -434,24 +440,76 @@ export class BrowserSearcher {
    */
   private async performSearch(url: string, engine: string): Promise<SearchResult[]> {
     try {
-      // Use curl to fetch search results
-      const { stdout } = await execa('curl', [
+      // Generate anti-bot headers
+      const headers = antiBotManager.generateHeaders();
+      const domain = new URL(url).hostname;
+
+      // Use curl to fetch search results with anti-bot headers
+      const { stdout, stderr } = await execa('curl', [
         '-s',
         '-L',
-        '-A', this.userAgent,
-        '-H', 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        '-H', 'Accept-Language: en-US,en;q=0.9',
+        '-A', headers['User-Agent'],
+        '-H', `Accept: ${headers['Accept']}`,
+        '-H', `Accept-Language: ${headers['Accept-Language']}`,
+        '-H', `Accept-Encoding: ${headers['Accept-Encoding']}`,
+        '-H', `Connection: ${headers['Connection']}`,
+        '-H', `Upgrade-Insecure-Requests: ${headers['Upgrade-Insecure-Requests']}`,
+        '-H', `Sec-Fetch-Dest: ${headers['Sec-Fetch-Dest']}`,
+        '-H', `Sec-Fetch-Mode: ${headers['Sec-Fetch-Mode']}`,
+        '-H', `Sec-Fetch-Site: ${headers['Sec-Fetch-Site']}`,
+        '-H', `sec-ch-ua: ${headers['sec-ch-ua']}`,
+        '-H', `sec-ch-ua-mobile: ${headers['sec-ch-ua-mobile']}`,
+        '-H', `sec-ch-ua-platform: ${headers['sec-ch-ua-platform']}`,
+        '-H', `Cookie: ${antiBotManager.getCookie(domain)}`,
         '--compressed',
         '--max-time', '15',
+        '--referer', 'https://www.google.com/',
         url,
       ], {
         timeout: 20000,
+        reject: false,
       });
-      
-      // Parse HTML results
-      return this.parseSearchResults(stdout, engine);
+
+      // Check for errors
+      if (stderr) {
+        console.warn(chalk.yellow(`curl warning: ${stderr}`));
+      }
+
+      // Check if response looks like a block page
+      if (stdout.includes('captcha') || 
+          stdout.includes('unusual traffic') ||
+          stdout.includes('robot verification') ||
+          stdout.includes('access denied')) {
+        console.warn(chalk.yellow(`Search engine may have blocked the request`));
+        // Rotate User-Agent for next request
+        antiBotManager.rotateUserAgent();
+        return [];
+      }
+
+      // Parse HTML results using enhanced parser v3
+      const parser = createUltraParser(engine, {
+        extractRichSnippets: true,
+        extractImages: true,
+        extractDates: true,
+        maxResults: 10,
+      });
+      const results = parser.parse(stdout);
+
+      // Log parsing results
+      if (results.length === 0) {
+        console.warn(chalk.yellow(`Parser extracted 0 results from ${engine} search`));
+      }
+
+      // Update cookies if present in response
+      // (In a real implementation, you'd capture Set-Cookie headers)
+
+      return results;
     } catch (error) {
       console.warn(chalk.yellow(`Search failed for ${engine}: ${error instanceof Error ? error.message : error}`));
+
+      // Rotate User-Agent on error
+      antiBotManager.rotateUserAgent();
+
       return [];
     }
   }

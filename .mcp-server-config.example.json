@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "mcp-diagnoser": {
+      "command": "node",
+      "args": [
+        "C:/Users/Administrator/mcp-diagnoser/.worktrees/mcp-first-redesign/dist/bin/mcp-server.js"
+      ],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    "mcp-diagnoser-dev": {
+      "command": "node",
+      "args": [
+        "C:/Users/Administrator/mcp-diagnoser/.worktrees/mcp-first-redesign/dist/bin/mcp-server.js"
+      ],
+      "env": {
+        "NODE_ENV": "development",
+        "DEBUG": "mcp-diagnoser:*"
+      }
+    }
+  }
+}

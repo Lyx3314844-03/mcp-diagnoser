@@ -10,10 +10,10 @@
 
 **Comprehensive diagnostic tool for MCP (Model Context Protocol) servers** - Created by **Lan**. Detect installation, dependency, connection, configuration, and package issues with automatic fix suggestions.
 
-> **Author**: Lan  
-> **Email**: 3314844@gmail.com  
-> **Version**: 1.3.0  
-> **License**: MIT  
+> **Author**: Lan
+> **Email**: 3314844@gmail.com
+> **Version**: 2.7.0
+> **License**: MIT
 > **Security**: ✅ Audited
 
 ## 🚀 Features
