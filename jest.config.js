@@ -7,6 +7,7 @@ module.exports = {
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {
       tsconfig: 'tsconfig.test.json',
+      isolatedModules: true,
     }],
   },
   collectCoverageFrom: [
@@ -20,6 +21,15 @@ module.exports = {
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
+  // Ignore ESM packages in node_modules from transformation
+  transformIgnorePatterns: [
+    'node_modules/(?!(execa|chalk|ora|table|semver|yaml)/)',
+  ],
   verbose: true,
   testTimeout: 10000,
+  // Mock ESM modules
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+    '^execa$': '<rootDir>/__mocks__/execa.js',
+  },
 };

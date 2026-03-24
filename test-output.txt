@@ -1,0 +1,4 @@
+
+> mcp-diagnoser@3.0.0 test
+> jest
+

@@ -22,8 +22,12 @@
     "postinstall": "node scripts/postinstall.js",
     "install:linux": "bash scripts/install.sh",
     "install:macos": "bash scripts/install.sh",
+    "install:windows": "scripts/install.bat",
     "warmup": "node dist/index-optimized.js warmup",
-    "perf": "node dist/index-optimized.js profile"
+    "perf": "node dist/index-optimized.js profile",
+    "release": "node scripts/release-v3.js",
+    "release:publish": "node scripts/release-v3.js --publish --auto-commit",
+    "release:playwright": "node publish-with-playwright.js"
   },
   "os": [
     "win32",

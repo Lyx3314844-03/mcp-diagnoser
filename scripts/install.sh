@@ -1,233 +1,207 @@
 #!/bin/bash
 
-# MCP Diagnoser Installation Script
-# Supports: Linux, macOS
+# MCP Diagnoser v3.0.0 安装脚本
+# 支持：Linux, macOS
 
 set -e
 
-# Colors for output
+VERSION="3.0.0"
+PACKAGE_NAME="mcp-diagnoser"
+REPO_URL="https://github.com/Lyx3314844-03/mcp-diagnoser.git"
+
+# 颜色
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Configuration
-PACKAGE_NAME="mcp-diagnoser"
-NODE_MIN_VERSION="18.0.0"
-INSTALL_DIR="/usr/local/lib/$PACKAGE_NAME"
-BIN_DIR="/usr/local/bin"
+echo -e "${GREEN}╔══════════════════════════════════════════════════════════╗${NC}"
+echo -e "${GREEN}║     MCP Diagnoser v${VERSION} 安装脚本                    ║${NC}"
+echo -e "${GREEN}║     支持：Linux, macOS                                   ║${NC}"
+echo -e "${GREEN}╚══════════════════════════════════════════════════════════╝${NC}"
+echo ""
 
-echo -e "${BLUE}╔══════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║${NC}       MCP Diagnoser Installation Script              ${BLUE}║${NC}"
-echo -e "${BLUE}╚══════════════════════════════════════════════════════════╝${NC}"
-echo
-
-# Detect OS
+# 检测操作系统
 detect_os() {
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        OS="macos"
-        OS_NAME="macOS"
-    elif [[ "$OSTYPE" == "linux-gnu"* ]] || [[ "$OSTYPE" == "linux-musl"* ]]; then
-        OS="linux"
-        OS_NAME="Linux"
-    else
-        echo -e "${RED}Unsupported operating system: $OSTYPE${NC}"
-        exit 1
-    fi
+    case "$(uname -s)" in
+        Linux*)     OS="Linux";;
+        Darwin*)    OS="macOS";;
+        *)          OS="Unknown";;
+    esac
+    echo -e "${BLUE}检测到操作系统：${OS}${NC}"
 }
 
-# Check if running as root
-check_root() {
-    if [[ $EUID -eq 0 ]]; then
-        echo -e "${YELLOW}Warning: Running as root. Consider using a regular user account.${NC}"
-    fi
-}
-
-# Check Node.js installation
-check_nodejs() {
-    echo -e "${BLUE}Checking Node.js installation...${NC}"
-    
+# 检查 Node.js
+check_node() {
     if ! command -v node &> /dev/null; then
-        echo -e "${RED}Node.js is not installed!${NC}"
-        echo
-        echo "Please install Node.js ${NODE_MIN_VERSION} or higher:"
-        echo
-        if [[ "$OS" == "macos" ]]; then
-            echo "  macOS:"
-            echo "    brew install node@20"
-            echo "    # or download from https://nodejs.org/"
-        elif [[ "$OS" == "linux" ]]; then
-            echo "  Ubuntu/Debian:"
-            echo "    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -"
-            echo "    sudo apt-get install -y nodejs"
-            echo
-            echo "  Fedora/RHEL:"
-            echo "    sudo dnf install -y nodejs"
-            echo
-            echo "  Arch Linux:"
-            echo "    sudo pacman -S nodejs npm"
-        fi
+        echo -e "${RED}❌ Node.js 未安装${NC}"
+        echo "请先安装 Node.js 18+: https://nodejs.org/"
         exit 1
     fi
     
-    NODE_VERSION=$(node -v | cut -d'v' -f2)
-    echo -e "${GREEN}✓ Node.js $NODE_VERSION found${NC}"
+    NODE_VERSION=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
+    if [ "$NODE_VERSION" -lt 18 ]; then
+        echo -e "${RED}❌ Node.js 版本过低 (需要 18+, 当前：$(node -v))${NC}"
+        exit 1
+    fi
     
-    # Check minimum version
+    echo -e "${GREEN}✓ Node.js $(node -v) 已安装${NC}"
+}
+
+# 检查 npm
+check_npm() {
     if ! command -v npm &> /dev/null; then
-        echo -e "${RED}npm is not installed!${NC}"
+        echo -e "${RED}❌ npm 未安装${NC}"
         exit 1
     fi
-    
-    NPM_VERSION=$(npm -v)
-    echo -e "${GREEN}✓ npm $NPM_VERSION found${NC}"
+    echo -e "${GREEN}✓ npm $(npm -v) 已安装${NC}"
 }
 
-# Check system dependencies
-check_system_deps() {
-    echo
-    echo -e "${BLUE}Checking system dependencies...${NC}"
+# 安装 Node.js (Linux)
+install_node_linux() {
+    echo -e "${YELLOW}正在安装 Node.js 20.x...${NC}"
     
-    # Check for build tools (needed for some npm packages)
-    if [[ "$OS" == "linux" ]]; then
-        if ! command -v make &> /dev/null || ! command -v g++ &> /dev/null; then
-            echo -e "${YELLOW}⚠ Build tools not found. Some features may not work.${NC}"
-            echo "  Install with:"
-            echo "    Ubuntu/Debian: sudo apt-get install -y build-essential"
-            echo "    Fedora/RHEL: sudo dnf groupinstall 'Development Tools'"
-            echo "    Arch: sudo pacman -S base-devel"
-        else
-            echo -e "${GREEN}✓ Build tools found${NC}"
-        fi
-    fi
-    
-    if [[ "$OS" == "macos" ]]; then
-        if ! xcode-select -v &> /dev/null; then
-            echo -e "${YELLOW}⚠ Xcode Command Line Tools not found.${NC}"
-            echo "  Install with: xcode-select --install"
-        else
-            echo -e "${GREEN}✓ Xcode Command Line Tools found${NC}"
-        fi
-    fi
-}
-
-# Install global npm packages
-install_npm_packages() {
-    echo
-    echo -e "${BLUE}Installing $PACKAGE_NAME globally...${NC}"
-    
-    # Get the directory where this script is located
-    SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-    PROJECT_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
-    
-    # Check if we're installing from local source or npm
-    if [[ -f "$PROJECT_ROOT/package.json" ]]; then
-        echo -e "${BLUE}Installing from local source...${NC}"
-        cd "$PROJECT_ROOT"
-        npm install
-        npm run build
-        npm link
+    if command -v apt-get &> /dev/null; then
+        # Debian/Ubuntu
+        curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+        sudo apt-get install -y nodejs
+    elif command -v dnf &> /dev/null; then
+        # Fedora/RHEL
+        sudo dnf install -y nodejs
+    elif command -v yum &> /dev/null; then
+        # CentOS
+        sudo yum install -y nodejs
+    elif command -v pacman &> /dev/null; then
+        # Arch Linux
+        sudo pacman -S nodejs npm
+    elif command -v zypper &> /dev/null; then
+        # openSUSE
+        sudo zypper install -y nodejs npm
     else
-        echo -e "${BLUE}Installing from npm...${NC}"
-        npm install -g "$PACKAGE_NAME"
+        echo -e "${RED}❌ 不支持的 Linux 发行版${NC}"
+        exit 1
     fi
-    
-    echo -e "${GREEN}✓ Installation complete${NC}"
 }
 
-# Create wrapper script
-create_wrapper() {
-    echo
-    echo -e "${BLUE}Creating wrapper script...${NC}"
+# 安装 Node.js (macOS)
+install_node_macos() {
+    echo -e "${YELLOW}正在安装 Node.js...${NC}"
     
-    # The npm link should have created the binary
-    if command -v $PACKAGE_NAME &> /dev/null; then
-        echo -e "${GREEN}✓ Binary created at: $(which $PACKAGE_NAME)${NC}"
+    if command -v brew &> /dev/null; then
+        brew install node@20
     else
-        echo -e "${YELLOW}⚠ Binary not found in PATH${NC}"
-        echo "  You may need to add npm global bin directory to PATH:"
-        echo "    export PATH=\$PATH:$(npm config get prefix)/bin"
+        echo -e "${RED}❌ Homebrew 未安装${NC}"
+        echo "请先安装 Homebrew: https://brew.sh/"
+        exit 1
     fi
 }
 
-# Verify installation
+# 全局安装 mcp-diagnoser
+install_globally() {
+    echo ""
+    echo -e "${BLUE}正在全局安装 ${PACKAGE_NAME}@${VERSION}...${NC}"
+    npm install -g ${PACKAGE_NAME}@${VERSION}
+    
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}✓ 安装成功！${NC}"
+    else
+        echo -e "${RED}✗ 安装失败${NC}"
+        exit 1
+    fi
+}
+
+# 从源码安装
+install_from_source() {
+    echo ""
+    echo -e "${BLUE}正在从源码安装...${NC}"
+    
+    # 克隆仓库
+    if [ -d "${PACKAGE_NAME}" ]; then
+        echo -e "${YELLOW}⚠  目录已存在，正在更新...${NC}"
+        cd ${PACKAGE_NAME}
+        git pull
+    else
+        git clone ${REPO_URL}
+        cd ${PACKAGE_NAME}
+    fi
+    
+    # 安装依赖
+    echo -e "${YELLOW}正在安装依赖...${NC}"
+    npm install
+    
+    # 构建
+    echo -e "${YELLOW}正在构建...${NC}"
+    npm run build:all
+    
+    # 链接
+    echo -e "${YELLOW}正在创建全局链接...${NC}"
+    sudo npm link
+    
+    echo -e "${GREEN}✓ 从源码安装成功！${NC}"
+}
+
+# 验证安装
 verify_installation() {
-    echo
-    echo -e "${BLUE}Verifying installation...${NC}"
+    echo ""
+    echo -e "${BLUE}验证安装...${NC}"
     
-    if command -v $PACKAGE_NAME &> /dev/null; then
-        VERSION=$($PACKAGE_NAME --version)
-        echo -e "${GREEN}✓ $PACKAGE_NAME $VERSION installed successfully${NC}"
+    if command -v mcp-diagnoser &> /dev/null; then
+        VERSION_INSTALLED=$(mcp-diagnoser --version)
+        echo -e "${GREEN}✓ mcp-diagnoser ${VERSION_INSTALLED} 已安装${NC}"
         
-        echo
-        echo -e "${BLUE}Testing basic commands...${NC}"
-        $PACKAGE_NAME --help > /dev/null 2>&1 && echo -e "${GREEN}✓ Help command works${NC}"
-        
-        echo
-        echo -e "${GREEN}╔══════════════════════════════════════════════════════════╗${NC}"
-        echo -e "${GREEN}║${NC}              Installation Successful!                ${GREEN}║${NC}"
-        echo -e "${GREEN}╚══════════════════════════════════════════════════════════╝${NC}"
-        echo
-        echo -e "${BLUE}Usage:${NC}"
-        echo "  $PACKAGE_NAME check          # Diagnose all MCP servers"
-        echo "  $PACKAGE_NAME packages       # Diagnose all packages"
-        echo "  $PACKAGE_NAME --help         # Show all commands"
-        echo
+        echo ""
+        echo -e "${GREEN}══════════════════════════════════════════════════════════${NC}"
+        echo -e "${GREEN}  安装完成！${NC}"
+        echo -e "${GREEN}══════════════════════════════════════════════════════════${NC}"
+        echo ""
+        echo -e "${BLUE}使用方法:${NC}"
+        echo "  mcp-diagnoser check          # 诊断所有 MCP 服务器"
+        echo "  mcp-diagnoser languages      # 检查语言环境"
+        echo "  mcp-diagnoser --help         # 显示帮助"
+        echo ""
     else
-        echo -e "${RED}✗ Installation verification failed${NC}"
-        echo "  Please check the error messages above"
+        echo -e "${RED}✗ 验证失败${NC}"
         exit 1
     fi
 }
 
-# Show post-installation tips
-show_tips() {
-    echo -e "${BLUE}╔══════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${BLUE}║${NC}              Post-Installation Tips                  ${BLUE}║${NC}"
-    echo -e "${BLUE}╚══════════════════════════════════════════════════════════╝${NC}"
-    echo
-    
-    echo -e "${YELLOW}1. Configure npm mirror (China users):${NC}"
-    echo "   npm config set registry https://registry.npmmirror.com"
-    echo
-    
-    echo -e "${YELLOW}2. Add MCP Diagnoser to your MCP configuration:${NC}"
-    echo "   Add to ~/.mcp.json:"
-    echo '   {'
-    echo '     "mcpServers": {'
-    echo '       "diagnoser": {'
-    echo '         "command": "mcp-diagnoser",'
-    echo '         "args": ["check"]'
-    echo '       }'
-    echo '     }'
-    echo '   }'
-    echo
-    
-    echo -e "${YELLOW}3. Quick start:${NC}"
-    echo "   mcp-diagnoser check          # Run full diagnosis"
-    echo "   mcp-diagnoser packages       # Check all packages"
-    echo "   mcp-diagnoser package-managers  # List package managers"
-    echo
-}
-
-# Main installation function
+# 主函数
 main() {
     detect_os
-    echo -e "${BLUE}Detected OS: $OS_NAME${NC}"
-    echo
     
-    check_root
-    check_nodejs
-    check_system_deps
-    install_npm_packages
-    create_wrapper
-    verify_installation
-    show_tips
+    echo ""
+    echo -e "${BLUE}检查依赖...${NC}"
+    check_node
+    check_npm
     
-    echo -e "${GREEN}Installation completed successfully!${NC}"
-    echo -e "${BLUE}Happy diagnosing! 🎉${NC}"
+    echo ""
+    echo -e "${BLUE}选择安装方式:${NC}"
+    echo "  1) 从 npm 全局安装 (推荐)"
+    echo "  2) 从源码安装"
+    echo "  3) 仅检查环境"
+    echo ""
+    read -p "请选择 [1-3]: " choice
+    
+    case $choice in
+        1)
+            install_globally
+            verify_installation
+            ;;
+        2)
+            install_from_source
+            verify_installation
+            ;;
+        3)
+            echo -e "${GREEN}✓ 环境检查通过${NC}"
+            exit 0
+            ;;
+        *)
+            echo -e "${RED}✗ 无效选择${NC}"
+            exit 1
+            ;;
+    esac
 }
 
-# Run main function
-main "$@"
+# 运行
+main
