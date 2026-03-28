@@ -8,8 +8,10 @@ set VERSION=3.0.0
 set PACKAGE_NAME=mcp-diagnoser
 set REPO_URL=https://github.com/Lyx3314844-03/mcp-diagnoser.git
 
+REM 打印横幅
 echo ╔══════════════════════════════════════════════════════════╗
 echo ║     MCP Diagnoser v%VERSION% Windows 安装脚本             ║
+echo ║     支持：Windows 10/11                                  ║
 echo ╚══════════════════════════════════════════════════════════╝
 echo.
 
@@ -18,7 +20,11 @@ echo [检查] 检查 Node.js...
 where node >nul 2>nul
 if %ERRORLEVEL% NEQ 0 (
     echo [错误] Node.js 未安装
-    echo 请先安装 Node.js 18+: https://nodejs.org/
+    echo.
+    echo 请先安装 Node.js 18+:
+    echo   访问：https://nodejs.org/
+    echo   或使用 winget: winget install OpenJS.NodeJS.LTS
+    echo.
     pause
     exit /b 1
 )
@@ -48,10 +54,22 @@ for /f "tokens=*" %%i in ('npm -v') do set NPM_VERSION=%%i
 echo [OK] npm %NPM_VERSION% 已安装
 echo.
 
+REM 检查 git
+echo [检查] 检查 git...
+where git >nul 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo [警告] git 未安装（从源码安装需要）
+    echo   访问：https://git-scm.com/download/win
+) else (
+    for /f "tokens=*" %%i in ('git --version') do set GIT_VERSION=%%i
+    echo [OK] %GIT_VERSION% 已安装
+)
+echo.
+
 REM 选择安装方式
 echo 选择安装方式:
-echo   1^) 从 npm 全局安装 ^(推荐^)
-echo   2^) 从源码安装
+echo   1^) 从 npm 全局安装 ^(推荐^) - 快速简单
+echo   2^) 从源码安装 - 适合开发
 echo   3^) 仅检查环境
 echo.
 set /p CHOICE="请选择 [1-3]: "
@@ -66,7 +84,9 @@ exit /b 1
 
 :INSTALL_GLOBAL
 echo.
+echo ══════════════════════════════════════════════════════════
 echo [安装] 正在全局安装 %PACKAGE_NAME%@%VERSION%...
+echo ══════════════════════════════════════════════════════════
 call npm install -g %PACKAGE_NAME%@%VERSION%
 if %ERRORLEVEL% NEQ 0 (
     echo [错误] 安装失败
@@ -78,7 +98,9 @@ goto VERIFY
 
 :INSTALL_SOURCE
 echo.
+echo ══════════════════════════════════════════════════════════
 echo [安装] 正在从源码安装...
+echo ══════════════════════════════════════════════════════════
 
 if exist %PACKAGE_NAME% (
     echo [提示] 目录已存在，正在更新...
@@ -110,7 +132,9 @@ exit /b 0
 
 :VERIFY
 echo.
+echo ══════════════════════════════════════════════════════════
 echo [验证] 验证安装...
+echo ══════════════════════════════════════════════════════════
 where mcp-diagnoser >nul 2>nul
 if %ERRORLEVEL% NEQ 0 (
     echo [错误] 验证失败
@@ -121,6 +145,16 @@ if %ERRORLEVEL% NEQ 0 (
 for /f "tokens=*" %%i in ('mcp-diagnoser --version') do set INSTALLED_VERSION=%%i
 echo [OK] mcp-diagnoser %INSTALLED_VERSION% 已安装
 
+REM 测试基本功能
+echo.
+echo [测试] 运行快速测试...
+mcp-diagnoser --help >nul 2>&1
+if %ERRORLEVEL% EQU 0 (
+    echo [OK] 命令执行正常
+) else (
+    echo [警告] 命令执行异常
+)
+
 echo.
 echo ══════════════════════════════════════════════════════════
 echo   安装完成！
@@ -129,7 +163,14 @@ echo.
 echo 使用方法:
 echo   mcp-diagnoser check          诊断所有 MCP 服务器
 echo   mcp-diagnoser languages      检查语言环境
+echo   mcp-diagnoser search ^<query^> 搜索 MCP 包
 echo   mcp-diagnoser --help         显示帮助
+echo.
+echo 常用命令:
+echo   mcp-diagnoser server ^<name^>  诊断特定服务器
+echo   mcp-diagnoser packages       诊断所有包
+echo   mcp-diagnoser playwright     检查 Playwright
+echo   mcp-diagnoser fix-all        自动修复问题
 echo.
 
 pause
